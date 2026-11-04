@@ -7,11 +7,13 @@ const Rng = preload("res://sim/rng.gd")
 const SimMap = preload("res://sim/grid_map.gd")
 const Balance = preload("res://sim/balance.gd")
 const SimUnit = preload("res://sim/sim_unit.gd")
+const Modes = preload("res://sim/modes.gd")
 
 var map
 var units: Array = []          # SimUnit, ordered by id
 var projectiles: Array = []    # dictionaries
 var rng
+var mode: Dictionary = {}     # game-mode state, see modes.gd
 var tick: int = 0
 var events: Array = []         # replay events for the last run_turn
 var frames: Array = []         # per-tick snapshots for the last run_turn
@@ -99,6 +101,8 @@ func step() -> void:
 			_combat(u)
 			_explosive_order(u)
 	_apply_kills()
+	if not mode.is_empty():
+		Modes.on_tick(self)
 
 # ---------------------------------------------------------------- movement
 
@@ -198,7 +202,7 @@ func _combat(u) -> void:
 	if tgt == null:
 		var best_d2 := 0x7FFFFFFFFFFF
 		for e in units:
-			if not e.alive or e.team == u.team or u.ignore.has(e.id):
+			if not e.alive or e.team == u.team or e.team >= 2 or u.ignore.has(e.id):
 				continue
 			if not _can_shoot(u, e, wt):
 				continue
@@ -237,7 +241,7 @@ func _apply_kills() -> void:
 
 func _explosive_order(u) -> void:
 	var wt: Dictionary = Balance.TYPES[u.type]
-	if wt["kind"] == "direct" or u.fired or u.fire_order.is_empty() or tick < u.fire_order["tick"]:
+	if not (wt["kind"] == "rocket" or wt["kind"] == "grenade") or u.fired or u.fire_order.is_empty() or tick < u.fire_order["tick"]:
 		return
 	var tx: int = u.fire_order["x"]
 	var ty: int = u.fire_order["y"]
@@ -351,7 +355,7 @@ func to_dict() -> Dictionary:
 		us.append(u.to_dict())
 	return {
 		"w": map.w, "h": map.h, "tiles": Array(map.t), "units": us,
-		"projectiles": projectiles.duplicate(true), "rng": rng.s, "tick": tick, "next_id": _next_id,
+		"projectiles": projectiles.duplicate(true), "mode": mode.duplicate(true), "rng": rng.s, "tick": tick, "next_id": _next_id,
 	}
 
 static func from_dict(d: Dictionary):
@@ -365,6 +369,7 @@ static func from_dict(d: Dictionary):
 	s.tick = d["tick"]
 	s._next_id = d["next_id"]
 	s.projectiles = d["projectiles"].duplicate(true)
+	s.mode = d["mode"].duplicate(true)
 	for ud in d["units"]:
 		s.units.append(SimUnit.from_dict(ud))
 	return s

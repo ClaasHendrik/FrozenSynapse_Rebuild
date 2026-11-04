@@ -5,11 +5,12 @@ A personal-use, native (Godot 4) simultaneous-turn tactics game in the style of 
 
 ## Status
 - [x] Step 1: deterministic simulation core + tests (`sim/`, `tests/`)
-- [ ] Map generator, planning UI, AI, game modes, campaign + packs, Linux packaging
+- [x] Step 2: procedural map generator, five game modes (Light/Dark), match flow (`sim/map_gen.gd`, `sim/modes.gd`, `sim/match.gd`)
+- [ ] Planning UI, AI, campaign + packs, Linux packaging
 
 ## Run the tests
 ```bash
-godot --headless --path . -s tests/run_tests.gd
+tests/run_all.sh /path/to/godot
 ```
 All balance numbers live in `sim/balance.gd`. Sim units: positions in milli-tiles (1000 = 1 tile),
 angles in decidegrees, 20 ticks/s, 100 ticks per 5 s turn.

@@ -31,6 +31,11 @@ const TYPES := {
 		"name": "Grenade Launcher", "kind": "grenade", "speed": 90, "range": 14000, "vision": 20000,
 		"react": 12, "turn": 90, "interval": 0, "chance_near": 0, "chance_far": 0, "shield": 0,
 	},
+	# Neutral hostage (team 2): never shoots, never targeted automatically
+	"hostage": {
+		"name": "Hostage", "kind": "none", "speed": 0, "range": 0, "vision": 0,
+		"react": 1, "turn": 1, "interval": 0, "chance_near": 0, "chance_far": 0, "shield": 0,
+	},
 	# Expansion unit ("Red"-style pack)
 	"riot": {
 		"name": "Riot Shield", "kind": "direct", "speed": 80, "range": 5000, "vision": 20000,
