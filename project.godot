@@ -1,0 +1,12 @@
+; Engine configuration file.
+config_version=5
+
+[application]
+
+config/name="Cold Synapse"
+config/features=PackedStringArray("4.3")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
