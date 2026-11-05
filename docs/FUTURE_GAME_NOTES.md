@@ -1,0 +1,36 @@
+# Future game: vision notes (captured from the conversation, 2026-11)
+
+These are the project owner's own words and decisions, condensed. They are the source for `NEW_GAME_DESIGN.md`.
+
+## Concept
+A completely new game: high-level war strategy (reference points: Command: Modern Operations, Gary Grigsby's games,
+Defcon) with simplified mechanics that are quick to learn, but with gameplay in the spirit of the simultaneous-turn
+planning of the current project ("Cold Synapse"), at a much larger scale. Inspired by other games, not copying them;
+may be released beyond private use, so everything must be original.
+
+## Decisions (answers to the open questions)
+1. **Setting:** everything, starting with the Cold War. Story arc: spy missions in Berlin, Vienna, London, Moscow and
+   others -> small border skirmishes NATO / Warsaw Pact -> a first invasion (either direction, to be decided by the
+   designer) through the Fulda Gap -> Germany as a nuclear wasteland -> global nuclear destruction -> the surviving
+   factions cooperate to launch a small colony ship so humanity survives ("we could have done this without the war").
+2. **Scale:** follows the story arc, city -> border -> theatre -> wasteland -> world.
+3. **Pace:** a long single-player campaign made of many shorter missions of about 30 to 60 minutes. Between missions: a
+   high-level layer of logistics, political and strategic-approach decisions that changes the goals, equipment and other
+   conditions of the next missions, and is changed by their results. The coupling is much tighter during the invasion
+   than during small battles.
+4. **Opponents:** single player first (playable from either side, including the decision layers); multiplayer later.
+5. **Layers:** different mission types plus supporting between-mission decision layers; not all active at the same time.
+6. **Platforms:** installable Linux app first; portable to Windows and macOS. Possibly released beyond private use.
+7. **Scoring / KPIs:** nuclear escalation, civilian impact and similar measures appear only where they fit the story.
+   Each mission type and each between-mission activity can have its own goals and success measures.
+
+## Tone (added later)
+Inject humour into gameplay and story: dark humour and "relaxed situations", whatever else works, always inside the
+logic of the storyline.
+
+## Legal / originality notes
+* The Cold War, real countries and cities are free to use. Avoid trademarked names (e.g. other games' titles),
+  copied units/stat tables, art, text or audio. Real weapon designations should be generic or fictional.
+* The current project (Cold Synapse) is a private-use rebuild of a commercial game and stays private. Anything meant to
+  be published should be the new game.
+* macOS builds need signing/notarisation through an Apple developer account for other people's Macs.
