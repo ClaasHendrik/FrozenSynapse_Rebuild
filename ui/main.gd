@@ -4,6 +4,7 @@ extends Control
 const Match = preload("res://sim/match.gd")
 const AI = preload("res://sim/ai.gd")
 const Board = preload("res://ui/board.gd")
+const View = preload("res://ui/board_view.gd")
 const Balance = preload("res://sim/balance.gd")
 const CampaignData = preload("res://campaign/campaign_data.gd")
 const MissionRules = preload("res://sim/mission.gd")
@@ -41,6 +42,12 @@ var overlay_action2: Callable
 var menu_box: Control
 var game_box: Control
 var side_label: Label
+var topbar: PanelContainer
+var ctx: PopupMenu
+var _ctx_world := Vector2i.ZERO
+var _ctx_unit := -1
+var bar_pinned := false
+var _bar_timer := 0.0
 var unit_label: Label
 var help_label: Label
 var plan_buttons: Control
@@ -80,11 +87,18 @@ func _button(text: String, cb: Callable) -> Button:
 	b.pressed.connect(cb)
 	b.focus_mode = Control.FOCUS_NONE
 	b.add_theme_font_size_override("font_size", 14)
+	b.add_theme_stylebox_override("normal", _neon_style(Color(0.03, 0.09, 0.3, 0.92), Color(0.3, 0.6, 1.0, 0.55)))
+	b.add_theme_stylebox_override("hover", _neon_style(Color(0.08, 0.22, 0.6, 1.0), Color(0.7, 0.9, 1.0, 0.95)))
+	b.add_theme_stylebox_override("pressed", _neon_style(Color(0.12, 0.35, 0.85, 1.0), Color(1, 1, 1, 1)))
+	b.add_theme_stylebox_override("disabled", _neon_style(Color(0.02, 0.04, 0.1, 0.8), Color(0.2, 0.3, 0.5, 0.3)))
 	return b
 
 func _build_menu() -> void:
-	var bg := ColorRect.new()
-	bg.color = Color("070b16")
+	View._textures()
+	var bg := TextureRect.new()
+	bg.texture = View._tex_bg
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	menu_box = CenterContainer.new()
@@ -209,75 +223,185 @@ func _start_mission(m: Dictionary) -> void:
 	campaign_mission = m
 	vs_ai = true
 	game = Match.create_mission(m)
+	help_label.visible = true
 	board.set_game(game)
 	committed = {}
 	last_replay = {}
 	_begin_turn()
 
+func _neon_style(bg: Color, border: Color, radius: int = 4) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.border_color = border
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(radius)
+	sb.content_margin_left = 10
+	sb.content_margin_right = 10
+	sb.content_margin_top = 4
+	sb.content_margin_bottom = 4
+	return sb
+
 func _build_game() -> void:
-	game_box = HBoxContainer.new()
-	game_box.clip_contents = true
+	game_box = Control.new()
 	game_box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	game_box.clip_contents = true
 	add_child(game_box)
 	board = Board.new()
-	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	board.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	board.set_anchors_preset(Control.PRESET_FULL_RECT)
 	game_box.add_child(board)
 	board.orders_changed.connect(_refresh_side)
 	board.selection_changed.connect(_refresh_side)
 	board.replay_finished.connect(_on_replay_finished)
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(260, 0)
-	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	game_box.add_child(panel)
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panel.add_child(scroll)
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 4)
-	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(v)
+	board.context_requested.connect(_on_context)
+	# --- compact status readout (bottom-left): the only permanent HUD
+	var hud := PanelContainer.new()
+	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_theme_stylebox_override("panel", _neon_style(Color(0.01, 0.03, 0.12, 0.55), Color(0.3, 0.6, 1.0, 0.25), 6))
+	hud.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	hud.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hud.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	hud.offset_bottom = -4
+	game_box.add_child(hud)
+	var hv := VBoxContainer.new()
+	hv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(hv)
 	side_label = _label("", 13)
-	side_label.custom_minimum_size = Vector2(236, 0)
+	side_label.custom_minimum_size = Vector2(520, 0)
+	side_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	side_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	v.add_child(side_label)
-	unit_label = _label("", 13)
-	v.add_child(unit_label)
-	plan_buttons = VBoxContainer.new()
-	v.add_child(plan_buttons)
+	side_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hv.add_child(side_label)
+	unit_label = _label("", 12)
+	unit_label.add_theme_color_override("font_color", Color(0.65, 0.85, 1.0))
+	unit_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	unit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hv.add_child(unit_label)
+	help_label = _label("Move the mouse to the top edge for orders, or right-click for the menu.", 12)
+	help_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.6))
+	help_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	help_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	help_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hv.add_child(help_label)
+	# --- orders bar: slides in when the cursor touches the top edge
+	topbar = PanelContainer.new()
+	topbar.add_theme_stylebox_override("panel", _neon_style(Color(0.01, 0.04, 0.16, 0.94), Color(0.35, 0.7, 1.0, 0.85), 0))
+	topbar.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	topbar.visible = false
+	game_box.add_child(topbar)
+	var bv := VBoxContainer.new()
+	topbar.add_child(bv)
+	plan_buttons = HBoxContainer.new()
+	plan_buttons.add_theme_constant_override("separation", 4)
+	bv.add_child(plan_buttons)
 	for spec in [
-		["Aim  (A)", func(): board.set_tool("aim")],
-		["Duck / stand  (D)", func(): board.toggle_duck()],
-		["Wait at last point  (W)", func(): board.cycle_wait()],
-		["Fire at point  (F)", func(): board.set_tool("fire")],
-		["Ignore enemy  (I)", func(): board.set_tool("ignore")],
-		["Continue on sight  (C)", func(): board.toggle_cos()],
-		["Undo last  (Backspace)", func(): board.remove_last_waypoint()],
-		["Clear unit orders  (Del)", func(): board.clear_orders()],
-		["Next unit  (Tab)", func(): board.select_next()],
-		["Test preview  (Space)", _on_test],
-		["Commit turn  (Enter)", _on_commit],
-		["Watch last turn", _on_watch_last],
+		["Aim [A]", "Face a point; a pre-aimed unit wins the first shot", func(): board.set_tool("aim")],
+		["Duck [D]", "Duck / stand at the last waypoint", func(): board.toggle_duck()],
+		["Wait [W]", "Wait 1 s more at the last waypoint", func(): board.cycle_wait()],
+		["Fire [F]", "Rocket / grenade: fire at a point", func(): board.set_tool("fire")],
+		["Ignore [I]", "Do not engage a chosen enemy", func(): board.set_tool("ignore")],
+		["Hold fire [C]", "Continue on sight: engage nobody", func(): board.toggle_cos()],
+		["Undo [Bksp]", "Remove the last waypoint", func(): board.remove_last_waypoint()],
+		["Clear [Del]", "Clear this unit's orders", func(): board.clear_orders()],
+		["Next [Tab]", "Select the next unit", func(): board.select_next()],
+		["TEST [Space]", "Preview this turn on a copy of the game", _on_test],
+		["COMMIT [Enter]", "Lock in the turn", _on_commit],
+		["Last turn", "Watch the last turn again", _on_watch_last],
+		["Menu", "Back to the main menu", func(): _show_phase("menu")],
 	]:
-		plan_buttons.add_child(_button(spec[0], spec[1]))
-	replay_buttons = VBoxContainer.new()
-	v.add_child(replay_buttons)
-	pause_btn = _button("Pause  (Space)", _toggle_pause)
+		var btn := _button(spec[0], spec[2])
+		btn.tooltip_text = spec[1]
+		btn.add_theme_font_size_override("font_size", 13)
+		plan_buttons.add_child(btn)
+	replay_buttons = HBoxContainer.new()
+	replay_buttons.add_theme_constant_override("separation", 6)
+	bv.add_child(replay_buttons)
+	pause_btn = _button("Pause [Space]", _toggle_pause)
 	replay_buttons.add_child(pause_btn)
-	replay_buttons.add_child(_button("Speed  (+/-)", func(): board.rspeed = 1.0 if board.rspeed >= 4.0 else board.rspeed * 2.0))
-	replay_buttons.add_child(_button("Skip  (Enter)", func(): board.end_replay()))
+	replay_buttons.add_child(_button("Speed [+/-]", func(): board.rspeed = 1.0 if board.rspeed >= 4.0 else board.rspeed * 2.0))
+	replay_buttons.add_child(_button("Skip [Enter]", func(): board.end_replay()))
 	timeline = HSlider.new()
 	timeline.min_value = 0.0
 	timeline.max_value = 5.0
 	timeline.step = 0.05
+	timeline.custom_minimum_size = Vector2(420, 0)
+	timeline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	timeline.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	timeline.focus_mode = Control.FOCUS_NONE
 	timeline.value_changed.connect(func(val): if not _updating_slider: board.rt = val; board.rpaused = true; board.queue_redraw())
 	replay_buttons.add_child(timeline)
-	help_label = _label("Click a unit to select. Click the map to add waypoints (paths avoid walls). Right-click removes the last waypoint.", 12)
-	help_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	v.add_child(help_label)
-	v.add_child(_button("Menu", func(): _show_phase("menu")))
+	replay_buttons.add_child(_button("Menu", func(): _show_phase("menu")))
+	# --- right-click context menu
+	ctx = PopupMenu.new()
+	ctx.add_theme_stylebox_override("panel", _neon_style(Color(0.01, 0.04, 0.16, 0.97), Color(0.4, 0.75, 1.0, 0.9), 4))
+	ctx.add_theme_stylebox_override("hover", _neon_style(Color(0.1, 0.3, 0.8, 1.0), Color(0.7, 0.9, 1.0, 0.0), 2))
+	ctx.add_theme_color_override("font_color", Color(0.85, 0.93, 1.0))
+	ctx.add_theme_color_override("font_hover_color", Color(1, 1, 1))
+	ctx.add_theme_color_override("font_separator_color", Color(0.4, 0.6, 1.0))
+	ctx.add_theme_font_size_override("font_size", 14)
+	ctx.id_pressed.connect(_on_ctx_item)
+	add_child(ctx)
+
+func _on_context(screen_pos: Vector2, world: Vector2i, unit_id: int) -> void:
+	_ctx_world = world
+	_ctx_unit = unit_id
+	ctx.clear()
+	help_label.visible = false
+	if phase == "plan":
+		var sel = game.sim.unit(board.selected) if board.selected >= 0 else null
+		var own_hit = game.sim.unit(unit_id) if unit_id >= 0 else null
+		if own_hit != null and board.game.can_order(plan_team, own_hit):
+			ctx.add_item("Select this unit", 10)
+		if sel != null and sel.alive:
+			ctx.add_item("Move here", 1)
+			ctx.add_item("Aim at this point", 2)
+			var kind: String = Balance.TYPES[sel.type]["kind"]
+			if kind == "rocket" or kind == "grenade":
+				ctx.add_item("Fire at this point", 3)
+			if own_hit != null and own_hit.team != sel.team:
+				ctx.add_item("Ignore / stop ignoring this enemy", 4)
+			ctx.add_separator()
+			ctx.add_item("Duck / stand", 5)
+			ctx.add_item("Wait 1 s more at last waypoint", 6)
+			ctx.add_item("Hold fire (continue on sight)", 7)
+			ctx.add_item("Undo last waypoint", 8)
+			ctx.add_item("Clear this unit's orders", 9)
+			ctx.add_separator()
+		ctx.add_item("Next unit", 20)
+		ctx.add_item("Test preview", 21)
+		ctx.add_item("Commit turn", 22)
+		if not last_replay.is_empty():
+			ctx.add_item("Watch last turn", 23)
+		ctx.add_item("Main menu", 24)
+	elif phase == "replay":
+		ctx.add_item("Resume" if board.rpaused else "Pause", 30)
+		ctx.add_item("Change speed", 31)
+		ctx.add_item("Skip", 32)
+	else:
+		return
+	ctx.position = Vector2i(screen_pos)
+	ctx.popup()
+
+func _on_ctx_item(id: int) -> void:
+	var w := _ctx_world
+	match id:
+		10: board.selected = _ctx_unit; board.selection_changed.emit(); board.queue_redraw()
+		1: if board.selected >= 0: board.add_waypoint(board.selected, w.x, w.y)
+		2: if board.selected >= 0: board.set_aim(board.selected, w.x, w.y)
+		3: if board.selected >= 0: board.set_fire(board.selected, w.x, w.y)
+		4: if board.selected >= 0 and _ctx_unit >= 0: board.toggle_ignore(board.selected, _ctx_unit)
+		5: board.toggle_duck()
+		6: board.cycle_wait()
+		7: board.toggle_cos()
+		8: board.remove_last_waypoint()
+		9: board.clear_orders()
+		20: board.select_next()
+		21: _on_test()
+		22: _on_commit()
+		23: _on_watch_last()
+		24: _show_phase("menu")
+		30: _toggle_pause()
+		31: board.rspeed = 1.0 if board.rspeed >= 4.0 else board.rspeed * 2.0
+		32: board.end_replay()
 
 func _build_overlay() -> void:
 	overlay = ColorRect.new()
@@ -321,10 +445,14 @@ func _show_phase(p: String) -> void:
 	menu_box.visible = (p == "menu")
 	campaign_box.visible = (p == "campaign")
 	game_box.visible = (p != "menu" and p != "campaign")
+	if p == "plan" or p == "pass":
+		pass
 	if p == "menu" or p == "campaign":
 		overlay.visible = false
 	plan_buttons.visible = (p == "plan")
 	replay_buttons.visible = (p == "replay")
+	if p == "menu" or p == "campaign":
+		topbar.visible = false
 	_refresh_side()
 
 func _on_start() -> void:
@@ -336,6 +464,7 @@ func _on_start() -> void:
 		opts["bid0"] = 14
 		opts["bid1"] = 12
 	game = Match.create(mode, int(seed_spin.value), dark_chk.button_pressed, opts)
+	help_label.visible = true
 	board.set_game(game)
 	committed = {}
 	last_replay = {}
@@ -371,18 +500,17 @@ func _team_name(team: int) -> String:
 func _refresh_side() -> void:
 	if game == null or side_label == null:
 		return
-	var s := "%s\nTurn %d — %s%s\n\n%s\n" % [
-		game.mode_name.capitalize(), game.turn + 1,
-		"Dark" if game.dark else "Light", "" if not game.over else " (over)",
-		MODE_TEXT.get(game.mode_name, "")]
+	var s := "%s - turn %d%s" % [game.mode_name.capitalize(), game.turn + 1, " (Dark)" if game.dark else ""]
 	if game.is_mission:
-		s = "%s %d — %s\nTurn %d of %d%s\n\n%s\n\n%s\n" % [campaign_pack.get("title", "Mission"), campaign_mission.get("id", 0), campaign_mission.get("title", ""), game.turn + 1, campaign_mission.get("turns", 8), " (Dark)" if game.dark else "", campaign_mission.get("brief", ""), "\n".join(game.objective_lines())]
+		s = "%s %d: %s - turn %d of %d%s\n%s" % [campaign_pack.get("title", "Mission"), campaign_mission.get("id", 0), campaign_mission.get("title", ""), game.turn + 1, campaign_mission.get("turns", 8), " (Dark)" if game.dark else "", "  |  ".join(game.objective_lines())]
+	elif game.turn == 0:
+		s += "\n" + MODE_TEXT.get(game.mode_name, "")
 	if phase == "plan":
-		s += "\nPlanning: %s" % _team_name(plan_team)
+		s += "  |  Planning: %s" % _team_name(plan_team)
 	elif phase == "replay":
-		s += "\n" + ("Test preview" if board.rtest else "Replay")
+		s += "  |  " + ("Test preview" if board.rtest else "Replay")
 	side_label.text = s
-	unit_label.text = board.unit_info() if phase == "plan" else ""
+	unit_label.text = board.unit_info().replace("\n", "  |  ") if phase == "plan" else ""
 
 func _on_test() -> void:
 	if phase != "plan":
@@ -477,7 +605,21 @@ func _toggle_pause() -> void:
 	board.rpaused = not board.rpaused
 	pause_btn.text = "Resume  (Space)" if board.rpaused else "Pause  (Space)"
 
-func _process(_d: float) -> void:
+func _process(d: float) -> void:
+	if topbar != null:
+		var want := bar_pinned
+		if (phase == "plan" or phase == "replay") and not overlay.visible and not ctx.visible:
+			var my: float = get_viewport().get_mouse_position().y
+			var inside: bool = get_viewport().get_visible_rect().has_point(get_viewport().get_mouse_position())
+			if inside and (my <= 6.0 or (topbar.visible and my <= topbar.size.y + 12.0)):
+				want = true
+		if want:
+			_bar_timer = 0.5
+		else:
+			_bar_timer -= d
+		topbar.visible = (phase == "plan" or phase == "replay") and not overlay.visible and (want or _bar_timer > 0.0)
+		if topbar.visible:
+			help_label.visible = false
 	if phase == "replay" and timeline != null:
 		_updating_slider = true
 		timeline.value = board.rt

@@ -22,8 +22,9 @@ angles in decidegrees, 20 ticks/s, 100 ticks per 5 s turn.
 ```bash
 godot --path .          # opens the menu: mode, Light/Dark, vs computer or hotseat
 ```
+Look: procedural neon 3D-style board (extruded glowing walls, cube half-walls, figure silhouettes, bloom). The orders bar is hidden until the mouse touches the top edge of the window; right-click opens a context menu.
 Controls: click a unit to select it, click the map to add waypoints (paths route around walls),
-right-click or Backspace to undo, **A** aim, **D** duck, **W** wait, **F** fire (rocket/grenade),
+Backspace to undo, **A** aim, **D** duck, **W** wait, **F** fire (rocket/grenade),
 **I** ignore an enemy, **C** continue on sight, **Tab** next unit, **Space** Test preview, **Enter** commit turn.
 Replay: Space pause, +/- speed, drag the timeline, Enter skips.
 Hotseat Dark mode shows the whole replay to both players (fog applies only while planning).

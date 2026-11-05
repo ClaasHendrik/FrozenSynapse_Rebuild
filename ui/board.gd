@@ -7,10 +7,13 @@ const Nav = preload("res://sim/nav.gd")
 const Balance = preload("res://sim/balance.gd")
 const SimMap = preload("res://sim/grid_map.gd")
 const Modes = preload("res://sim/modes.gd")
+const View = preload("res://ui/board_view.gd")
+const FxLayer = preload("res://ui/board_fx.gd")
 
 signal orders_changed
 signal selection_changed
 signal replay_finished(was_test: bool)
+signal context_requested(screen_pos: Vector2, world: Vector2i, unit_id: int)
 
 const COL_BG := Color("070b16")
 const COL_FLOOR := Color("0d1630")
@@ -33,6 +36,7 @@ var ts := 32.0
 var origin := Vector2.ZERO
 var tiles := PackedByteArray()
 var vis := PackedByteArray()
+var fog_tex: ImageTexture = null
 var _rmap = null
 var _base_tiles := PackedByteArray()
 
@@ -48,10 +52,15 @@ var _rvis_frame := -1
 var _rvis_ids: Dictionary = {}
 var _hold := 0.0
 
+var fx_layer = null
+
 func _ready() -> void:
 	focus_mode = Control.FOCUS_ALL
 	clip_contents = true
 	resized.connect(queue_redraw)
+	fx_layer = FxLayer.new()
+	fx_layer.board = self
+	add_child(fx_layer)
 
 # ------------------------------------------------------------------ public API
 
@@ -264,7 +273,7 @@ func _layout() -> void:
 	if game == null:
 		return
 	var m = game.sim.map
-	ts = floorf(minf(size.x / m.w, size.y / m.h))
+	ts = floorf(minf(size.x / (m.w + 1.4), size.y / (m.h + 1.4)))
 	ts = maxf(ts, 8.0)
 	origin = Vector2((size.x - ts * m.w) * 0.5, (size.y - ts * m.h) * 0.5)
 
@@ -281,6 +290,7 @@ func _compute_vis() -> void:
 	vis.resize(m.w * m.h)
 	if not game.dark:
 		vis.fill(1)
+		fog_tex = null
 		return
 	for u in game.sim.units:
 		if not u.alive or u.team != view_team:
@@ -300,6 +310,11 @@ func _compute_vis() -> void:
 				if (cx - u.x) * (cx - u.x) + (cy - u.y) * (cy - u.y) <= r * r and Fx.angle_diff(u.facing, Fx.atan2_dd(cy - u.y, cx - u.x)) <= fov:
 					if m.los(u.x, u.y, cx, cy, false) or (m.tile(tx, ty) == SimMap.WALL and m.los(u.x, u.y, cx - signi(cx - u.x) * 400, cy - signi(cy - u.y) * 400, false)):
 						vis[ty * m.w + tx] = 1
+	var img := Image.create(m.w, m.h, false, Image.FORMAT_RGBA8)
+	for ty in range(m.h):
+		for tx in range(m.w):
+			img.set_pixel(tx, ty, Color(0.0, 0.01, 0.06, 0.0 if vis[ty * m.w + tx] == 1 else 0.66))
+	fog_tex = ImageTexture.create_from_image(img)
 
 # ------------------------------------------------------------------ input
 
@@ -320,16 +335,19 @@ func _unit_at(pos: Vector2, only_orderable: bool):
 	return best
 
 func _gui_input(event: InputEvent) -> void:
-	if game == null or phase != "plan":
+	if game == null or (phase != "plan" and phase != "replay"):
 		return
 	if event is InputEventMouseButton and event.pressed:
 		grab_focus()
 		if event.button_index == MOUSE_BUTTON_RIGHT:
-			if tool != "path":
+			if tool != "path" and phase == "plan":
 				tool = "path"
 				queue_redraw()
 			else:
-				remove_last_waypoint()
+				var hit_u = _unit_at(event.position, false) if phase == "plan" else null
+				context_requested.emit(get_global_mouse_position(), _world(event.position), hit_u.id if hit_u != null else -1)
+			return
+		if phase != "plan":
 			return
 		if event.button_index != MOUSE_BUTTON_LEFT:
 			return
@@ -379,94 +397,9 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	if game == null:
 		return
-	_layout()
-	draw_rect(Rect2(Vector2.ZERO, size), COL_BG)
-	var m = game.sim.map
-	var cur: PackedByteArray = tiles
-	var f := 0
-	var fa := 0.0
-	if phase == "replay" and not rframes.is_empty():
-		var ft := rt * 20.0
-		f = clampi(int(ft), 0, rframes.size() - 1)
-		fa = ft - float(f)
-		cur = _tiles_at(f)
-	for ty in range(m.h):
-		for tx in range(m.w):
-			var r := Rect2(origin + Vector2(tx, ty) * ts, Vector2(ts, ts))
-			var k: int = cur[ty * m.w + tx]
-			if k == SimMap.WALL:
-				draw_rect(r, COL_WALL)
-				draw_rect(r, COL_WALL_EDGE, false, 1.0)
-			else:
-				draw_rect(r, COL_FLOOR)
-				draw_rect(r, COL_GRID, false, 1.0)
-				if k == SimMap.LOW:
-					draw_rect(r.grow(-ts * 0.18), COL_LOW)
-					draw_rect(r.grow(-ts * 0.18), COL_WALL_EDGE, false, 1.0)
-	_draw_objectives(f)
-	if phase == "replay":
-		_draw_replay(f, fa)
-	else:
-		_draw_plan(m)
-
-func _draw_objectives(f: int) -> void:
-	var md: Dictionary = game.sim.mode
-	var yellow := Color(1.0, 0.82, 0.29, 0.9)
-	match md.get("type", ""):
-		"mission":
-			var shown := {}
-			for o in md["objectives"]:
-				for r in o["rects"]:
-					if o["type"] != "collect" and not shown.has(str(r)):
-						shown[str(r)] = true
-						draw_rect(Rect2(origin + Vector2(r[0], r[1]) * ts, Vector2(r[2] - r[0] + 1, r[3] - r[1] + 1) * ts), Color(1, 0.82, 0.29, 0.12))
-						draw_rect(Rect2(origin + Vector2(r[0], r[1]) * ts, Vector2(r[2] - r[0] + 1, r[3] - r[1] + 1) * ts), yellow, false, 2.0)
-			if md.has("boxes") or md["rescued"] >= 0 and _mission_uses_exits(md):
-				for t in range(2):
-					var ex: Array = md["exits"][t]
-					draw_rect(Rect2(origin + Vector2(ex[0], ex[1]) * ts, Vector2(ex[2] - ex[0] + 1, ex[3] - ex[1] + 1) * ts), Color(0.3, 1, 0.5, 0.1))
-			var mboxes: Array = []
-			if phase == "replay" and f < rframes.size() and not rframes[f]["b"].is_empty():
-				mboxes = rframes[f]["b"]
-			elif md.has("boxes"):
-				for b in md["boxes"]:
-					mboxes.append([b["x"], b["y"], b["delivered"] or b["lost"]])
-			for b in mboxes:
-				if not b[2]:
-					draw_rect(Rect2(_p(b[0], b[1]) - Vector2(ts, ts) * 0.2, Vector2(ts, ts) * 0.4), yellow)
-			for pn in md["panels"]:
-				var pc := Color(0.4, 0.9, 1.0, 0.35 if pn["done"] else 0.9)
-				draw_rect(Rect2(origin + Vector2(pn["tx"], pn["ty"]) * ts + Vector2(ts, ts) * 0.2, Vector2(ts, ts) * 0.6), pc, false, 2.0)
-		"secure":
-			var z: Array = md["zone"]
-			draw_rect(Rect2(origin + Vector2(z[0], z[1]) * ts, Vector2(z[2] - z[0] + 1, z[3] - z[1] + 1) * ts), Color(1, 0.82, 0.29, 0.14))
-			draw_rect(Rect2(origin + Vector2(z[0], z[1]) * ts, Vector2(z[2] - z[0] + 1, z[3] - z[1] + 1) * ts), yellow, false, 2.0)
-		"disputed":
-			for t in range(2):
-				var e: Array = md["exits"][t]
-				var c := Color(0.3, 1, 0.5, 0.12 if md["active"] else 0.04)
-				draw_rect(Rect2(origin + Vector2(e[0], e[1]) * ts, Vector2(e[2] - e[0] + 1, e[3] - e[1] + 1) * ts), c)
-			var boxes: Array = []
-			if phase == "replay" and f < rframes.size() and not rframes[f]["b"].is_empty():
-				boxes = rframes[f]["b"]
-			else:
-				for b in md["boxes"]:
-					boxes.append([b["x"], b["y"], b["delivered"] or not md["active"]])
-			for b in boxes:
-				if b[2]:
-					continue
-				var p := _p(b[0], b[1])
-				draw_rect(Rect2(p - Vector2(ts, ts) * 0.2, Vector2(ts, ts) * 0.4), yellow)
-		"hostage":
-			var sq: Array = md["square"]
-			draw_rect(Rect2(origin + Vector2(sq[0], sq[1]) * ts, Vector2(sq[2] - sq[0] + 1, sq[3] - sq[1] + 1) * ts), yellow, false, 2.0)
-			for t in range(2):
-				var e2: Array = md["exits"][t]
-				draw_rect(Rect2(origin + Vector2(e2[0], e2[1]) * ts, Vector2(e2[2] - e2[0] + 1, e2[3] - e2[1] + 1) * ts), Color(0.3, 1, 0.5, 0.08))
-		"charge":
-			var bx: int = md["bid"] if md["attacker"] == 0 else md["w"] - 1 - md["bid"]
-			var x := origin.x + (bx + (0.5)) * ts
-			draw_line(Vector2(x, origin.y), Vector2(x, origin.y + game.sim.map.h * ts), yellow, 2.0)
+	View.draw_solid(self, self)
+	if fx_layer != null:
+		fx_layer.queue_redraw()
 
 func _mission_uses_exits(md: Dictionary) -> bool:
 	for o in md["objectives"]:
@@ -481,94 +414,6 @@ func _tiles_at(f: int) -> PackedByteArray:
 		if e["type"] == "wall_destroyed" and e["tick"] <= f:
 			t[e["ty"] * w + e["tx"]] = SimMap.FLOOR
 	return t
-
-func _draw_unit(pos: Vector2, team: int, type: String, facing: int, ducked: bool, sel: bool, alpha: float = 1.0, ghost: bool = false) -> void:
-	var col: Color = TEAM_COL[team]
-	col.a = alpha
-	var r := ts * (0.26 if ducked else 0.33)
-	if ghost:
-		draw_arc(pos, r, 0, TAU, 20, col, 1.5)
-	else:
-		draw_circle(pos, r, col)
-		var ang := float(facing) / 10.0 * PI / 180.0
-		var dir := Vector2(cos(ang), sin(ang))
-		draw_line(pos, pos + dir * ts * 0.55, Color(1, 1, 1, alpha), 2.0)
-		var font := ThemeDB.fallback_font
-		draw_string(font, pos + Vector2(-ts * 0.12, ts * 0.12), LETTER.get(type, "?"), HORIZONTAL_ALIGNMENT_LEFT, -1, int(ts * 0.38), Color(0.02, 0.05, 0.1, alpha))
-	if ducked and not ghost:
-		draw_arc(pos, r + 3, 0, TAU, 20, Color(1, 1, 1, 0.5), 1.0)
-	if sel:
-		draw_arc(pos, ts * 0.5, 0, TAU, 28, Color(1, 1, 1, 1), 2.0)
-
-func _draw_orders(id: int, o: Dictionary, col: Color) -> void:
-	var u = _unit(id)
-	var prev := _p(u.x, u.y)
-	for wp in o.get("path", []):
-		var q := _p(wp["x"], wp["y"])
-		draw_line(prev, q, col, 2.0)
-		draw_circle(q, 3.5, col)
-		if wp["wait"] > 0:
-			draw_string(ThemeDB.fallback_font, q + Vector2(5, -5), "%ds" % wp["wait"], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, col)
-		if wp["duck"] != u.ducked or wp["duck"]:
-			draw_arc(q, 7, 0, TAU, 12, col, 1.0)
-		if wp["aim_x"] >= 0:
-			_dashed(q, _p(wp["aim_x"], wp["aim_y"]), col)
-		prev = q
-	if o.has("aim"):
-		_dashed(_p(u.x, u.y), _p(o["aim"]["x"], o["aim"]["y"]), col)
-	if o.has("fire"):
-		var c := _p(o["fire"]["x"], o["fire"]["y"])
-		var rad: float = Balance.EXPLOSIVES[Balance.TYPES[u.type]["kind"]]["radius"] / 1000.0 * ts
-		draw_arc(c, rad, 0, TAU, 32, Color(1, 0.6, 0.2, 0.8), 1.5)
-		draw_line(c - Vector2(8, 0), c + Vector2(8, 0), Color(1, 0.6, 0.2), 2.0)
-		draw_line(c - Vector2(0, 8), c + Vector2(0, 8), Color(1, 0.6, 0.2), 2.0)
-		_dashed(_p(u.x, u.y), c, Color(1, 0.6, 0.2, 0.6))
-	for eid in o.get("ignore", []):
-		var e = _unit(eid)
-		if e != null:
-			var q2 := _p(e.x, e.y)
-			draw_line(q2 - Vector2(6, 6), q2 + Vector2(6, 6), Color(1, 1, 0.3), 2.0)
-			draw_line(q2 - Vector2(6, -6), q2 + Vector2(6, -6), Color(1, 1, 0.3), 2.0)
-
-func _dashed(a: Vector2, b: Vector2, col: Color) -> void:
-	var d := a.distance_to(b)
-	if d < 1.0:
-		return
-	var dir := (b - a) / d
-	var s := 0.0
-	var c := col
-	c.a = 0.6
-	while s < d:
-		draw_line(a + dir * s, a + dir * minf(s + 5.0, d), c, 1.0)
-		s += 10.0
-
-func _draw_plan(m) -> void:
-	# fog
-	if game.dark:
-		for ty in range(m.h):
-			for tx in range(m.w):
-				if vis[ty * m.w + tx] == 0:
-					draw_rect(Rect2(origin + Vector2(tx, ty) * ts, Vector2(ts, ts)), Color(0, 0, 0, 0.55))
-	var visible_ids: Array = game.visible_enemy_ids(view_team)
-	for u in game.sim.units:
-		if u.team == view_team:
-			continue
-		if not u.alive:
-			continue
-		if visible_ids.has(u.id):
-			_draw_unit(_p(u.x, u.y), u.team, u.type, u.facing, u.ducked, u.id == selected)
-		elif game.dark and game.last_seen[view_team].has(u.id):
-			var ls: Array = game.last_seen[view_team][u.id]
-			_draw_unit(_p(ls[0], ls[1]), u.team, u.type, 0, false, false, 0.5, true)
-	for id in test_orders.keys():
-		_draw_orders(id, test_orders[id], Color(1, 0.3, 0.4, 0.55))
-	for u in game.sim.units:
-		if u.alive and u.team == view_team:
-			if orders.has(u.id):
-				_draw_orders(u.id, orders[u.id], Color(0.3, 1.0, 0.6, 0.9))
-			_draw_unit(_p(u.x, u.y), u.team, u.type, u.facing, u.ducked, u.id == selected)
-	if tool != "path":
-		draw_string(ThemeDB.fallback_font, Vector2(10, 22), "Tool: %s — click target (right-click cancels)" % tool, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1, 1, 0.5))
 
 func _frame_unit(frame: Dictionary, id: int) -> Array:
 	for a in frame["u"]:
@@ -598,45 +443,3 @@ func _replay_visible(f: int) -> Dictionary:
 			if dx * dx + dy * dy <= vr * vr and Fx.angle_diff(a[3], Fx.atan2_dd(dy, dx)) <= fovr and _rmap.los(a[1], a[2], b[1], b[2], bool(a[5]) or bool(b[5])):
 				_rvis_ids[b[0]] = true
 	return _rvis_ids
-
-func _draw_replay(f: int, fa: float) -> void:
-	var fr: Dictionary = rframes[f]
-	var nxt: Dictionary = rframes[mini(f + 1, rframes.size() - 1)]
-	var seen: Dictionary = {}
-	if game.dark and not rshow_all:
-		seen = _replay_visible(f)
-	for a in fr["u"]:
-		var u = _unit(a[0])
-		var b: Array = _frame_unit(nxt, a[0])
-		if u.team != rview and u.team < 2 and game.dark and not rshow_all and not seen.has(a[0]):
-			continue
-		if u.team == 2 and game.dark and not rshow_all and not seen.has(a[0]):
-			continue
-		if not a[4]:
-			var q := _p(a[1], a[2])
-			draw_line(q - Vector2(5, 5), q + Vector2(5, 5), Color(TEAM_COL[u.team], 0.5), 2.0)
-			draw_line(q - Vector2(5, -5), q + Vector2(5, -5), Color(TEAM_COL[u.team], 0.5), 2.0)
-			continue
-		var pos := _p(lerpf(a[1], b[1], fa), lerpf(a[2], b[2], fa))
-		_draw_unit(pos, u.team, u.type, a[3], bool(a[5]), false)
-	for pr in fr["p"]:
-		var pp := _p(pr[1], pr[2])
-		draw_circle(pp, 4 if pr[0] == "rocket" else 5, Color(1, 0.7, 0.2))
-	for e in revents:
-		var age: int = f - e["tick"]
-		if age < 0:
-			continue
-		match e["type"]:
-			"shot":
-				if age <= 2:
-					var s: Array = _frame_unit(rframes[e["tick"]], e["shooter"])
-					var t: Array = _frame_unit(rframes[e["tick"]], e["target"])
-					if not s.is_empty() and not t.is_empty() and (not game.dark or rshow_all or seen.has(e["shooter"]) or _unit(e["shooter"]).team == rview):
-						draw_line(_p(s[1], s[2]), _p(t[1], t[2]), Color(1, 0.3, 0.3, 0.9) if e["hit"] else Color(0.8, 0.8, 0.8, 0.4), 1.5)
-			"explosion":
-				if age <= 12:
-					var k := float(age) / 12.0
-					draw_circle(_p(e["x"], e["y"]), e["radius"] / 1000.0 * ts * k, Color(1, 0.6, 0.2, 0.45 * (1.0 - k)))
-					draw_arc(_p(e["x"], e["y"]), e["radius"] / 1000.0 * ts * k, 0, TAU, 32, Color(1, 0.8, 0.3, 1.0 - k), 2.0)
-	var label := "TEST PREVIEW" if rtest else "REPLAY"
-	draw_string(ThemeDB.fallback_font, Vector2(10, 22), "%s  %.1fs / %.1fs%s" % [label, rt, replay_length(), "  [paused]" if rpaused else ""], HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(1, 1, 0.5))
