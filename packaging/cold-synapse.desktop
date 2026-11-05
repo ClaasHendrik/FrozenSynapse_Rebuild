@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Cold Synapse
+GenericName=Tactics game
+Comment=Simultaneous-turn tactics with a campaign of 79 missions
+Exec=cold-synapse
+Icon=cold-synapse
+Terminal=false
+Categories=Game;StrategyGame;
+Keywords=tactics;strategy;turn-based;

@@ -9,7 +9,8 @@ A personal-use, native (Godot 4) simultaneous-turn tactics game in the style of 
 - [x] Step 3: planning UI, Test preview, replay, hotseat, look-ahead AI (`ui/`, `sim/ai.gd`, `sim/nav.gd`)
 - [x] Step 3.5: rules brought in line with the original (deterministic time-to-kill combat, real mode rules, Upload mode) — see `docs/RULES_REFERENCE.md`
 - [x] Step 4: campaign — 55 missions in 19 chapters, Red-style pack (12), Blackout bonus pack (12); mission engine, allies, reinforcements, panels, progress saving (`campaign/`, `sim/mission.gd`)
-- [ ] Playtest tuning, Linux packaging (AppImage/.deb)
+- [x] Step 5: Linux packaging: `.deb` and portable tarball (`packaging/build_linux.sh`), AppImage script (`packaging/build_appimage.sh`, run on your own machine with appimagetool)
+- [ ] Playtest tuning; add-on units/objects for the Blackout pack (proposed, awaiting decisions)
 
 ## Run the tests
 ```bash
@@ -39,3 +40,12 @@ Missions are plain JSON in `campaign/*.json` (squads as `"mg*2"`, `"rl:launcher"
 kill_target, reach, collect, rescue, hold, survive; optional events, panels, dark, turn_seconds). Edit or add missions
 there; `sim/mission.gd` documents every field. Maps are generated from each mission's fixed seed.
 Progress is saved to `user://campaign_progress.json`; the campaign screen has an "unlock all" switch.
+
+## Packaging (Linux)
+```bash
+packaging/build_linux.sh /path/to/Godot_v4.3-stable_linux.x86_64     # -> build/*.deb and build/*.tar.gz
+sudo apt install ./build/cold-synapse_0.4.0_amd64.deb                  # installs to /opt/cold-synapse, command: cold-synapse
+packaging/build_appimage.sh /path/to/Godot_v4.3-stable_linux.x86_64 /path/to/appimagetool   # AppImage (run on your machine)
+```
+The Godot binary is the runtime for the game's `.pck`. Saves and campaign progress go to `~/.local/share/godot/app_userdata/Cold Synapse/`.
+Windows and macOS exports use Godot export templates (macOS also needs signing/notarisation); not done yet.

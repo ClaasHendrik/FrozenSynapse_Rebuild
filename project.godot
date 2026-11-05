@@ -5,6 +5,8 @@ config_version=5
 
 config/name="Cold Synapse"
 config/features=PackedStringArray("4.3")
+config/icon="res://icon.png"
+run/boot_splash/bg_color=Color(0.004, 0.016, 0.07, 1)
 run/main_scene="res://ui/main.tscn"
 
 [display]
