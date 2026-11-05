@@ -79,6 +79,7 @@ func _button(text: String, cb: Callable) -> Button:
 	b.text = text
 	b.pressed.connect(cb)
 	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_size_override("font_size", 14)
 	return b
 
 func _build_menu() -> void:
@@ -215,6 +216,7 @@ func _start_mission(m: Dictionary) -> void:
 
 func _build_game() -> void:
 	game_box = HBoxContainer.new()
+	game_box.clip_contents = true
 	game_box.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(game_box)
 	board = Board.new()
@@ -225,15 +227,22 @@ func _build_game() -> void:
 	board.selection_changed.connect(_refresh_side)
 	board.replay_finished.connect(_on_replay_finished)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(250, 0)
+	panel.custom_minimum_size = Vector2(260, 0)
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	game_box.add_child(panel)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.add_child(scroll)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 6)
-	panel.add_child(v)
-	side_label = _label("", 15)
+	v.add_theme_constant_override("separation", 4)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(v)
+	side_label = _label("", 13)
+	side_label.custom_minimum_size = Vector2(236, 0)
 	side_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(side_label)
-	unit_label = _label("", 14)
+	unit_label = _label("", 13)
 	v.add_child(unit_label)
 	plan_buttons = VBoxContainer.new()
 	v.add_child(plan_buttons)
@@ -272,7 +281,7 @@ func _build_game() -> void:
 
 func _build_overlay() -> void:
 	overlay = ColorRect.new()
-	overlay.color = Color(0.03, 0.05, 0.1, 0.97)
+	overlay.color = Color(0.03, 0.05, 0.1, 1.0)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(overlay)
 	var c := CenterContainer.new()
@@ -295,7 +304,8 @@ func _show_overlay(text: String, button: String, action: Callable, button2: Stri
 	overlay_label.text = text
 	overlay_label.add_theme_font_size_override("font_size", 20 if button2 != "" else 28)
 	overlay_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	overlay_label.custom_minimum_size = Vector2(900 if button2 != "" else 0, 0)
+	overlay_label.custom_minimum_size = Vector2(900 if button2 != "" else 640, 0)
+	overlay_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	overlay_btn.text = button
 	overlay_action = action
 	overlay_btn2.visible = button2 != ""

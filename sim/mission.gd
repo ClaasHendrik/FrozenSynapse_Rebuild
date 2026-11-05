@@ -48,7 +48,7 @@ static func build_state(mission: Dictionary, rects: Dictionary, items: Array, pa
 			rs = [rects["exit_left"], rects["exit_right"]]
 		elif rects.has(zname):
 			rs = [rects[zname]]
-		od["rects"] = rs
+		od["rects"] = rs if (od["type"] == "reach" or od["type"] == "hold") else []
 		m["objectives"].append(od)
 		if od["type"] == "collect":
 			m["boxes"] = []
