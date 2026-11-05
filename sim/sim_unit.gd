@@ -4,7 +4,7 @@ const FIELDS := [
 	"id", "team", "type", "x", "y", "facing", "alive", "ducked", "moving", "extracted",
 	"path", "wp_i", "wait_left", "aim_lock", "aim_x", "aim_y", "ignore", "focus", "cos",
 	"fires", "fire_i", "anim_left", "anim_order", "fire_cd",
-	"pending_duck", "stance_lock", "target", "progress", "unaware", "turn_ms",
+	"pending_duck", "stance_lock", "target", "progress", "unaware", "turn_ms", "tag",
 ]
 
 var id: int = 0
@@ -37,6 +37,7 @@ var target: int = -1
 var progress: int = 0         # kill progress, 1,000,000 = kill shot
 var unaware: bool = false
 var turn_ms: int = 0
+var tag: String = ""         # campaign roles: vip, target, ally, rescue, launcher, wave ...
 
 func to_dict() -> Dictionary:
 	var d := {}

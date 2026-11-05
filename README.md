@@ -8,7 +8,8 @@ A personal-use, native (Godot 4) simultaneous-turn tactics game in the style of 
 - [x] Step 2: procedural map generator, five game modes (Light/Dark), match flow (`sim/map_gen.gd`, `sim/modes.gd`, `sim/match.gd`)
 - [x] Step 3: planning UI, Test preview, replay, hotseat, look-ahead AI (`ui/`, `sim/ai.gd`, `sim/nav.gd`)
 - [x] Step 3.5: rules brought in line with the original (deterministic time-to-kill combat, real mode rules, Upload mode) — see `docs/RULES_REFERENCE.md`
-- [ ] Campaign (55 missions, 19 chapters) + Red-style pack + bonus pack, Linux packaging
+- [x] Step 4: campaign — 55 missions in 19 chapters, Red-style pack (12), Blackout bonus pack (12); mission engine, allies, reinforcements, panels, progress saving (`campaign/`, `sim/mission.gd`)
+- [ ] Playtest tuning, Linux packaging (AppImage/.deb)
 
 ## Run the tests
 ```bash
@@ -31,3 +32,9 @@ Screenshots under a virtual display (used for visual checks):
 ```bash
 xvfb-run -a godot --rendering-driver opengl3 --path . -s tests/ui_smoke.gd -- /output/dir
 ```
+
+## Campaign data
+Missions are plain JSON in `campaign/*.json` (squads as `"mg*2"`, `"rl:launcher"`, `"civ:vip"`; objectives: eliminate,
+kill_target, reach, collect, rescue, hold, survive; optional events, panels, dark, turn_seconds). Edit or add missions
+there; `sim/mission.gd` documents every field. Maps are generated from each mission's fixed seed.
+Progress is saved to `user://campaign_progress.json`; the campaign screen has an "unlock all" switch.

@@ -8,6 +8,7 @@ const Sim = preload("res://sim/simulation.gd")
 const MapGen = preload("res://sim/map_gen.gd")
 const Modes = preload("res://sim/modes.gd")
 const Balance = preload("res://sim/balance.gd")
+const MissionRules = preload("res://sim/mission.gd")
 
 const SQUAD_POOL := ["mg", "mg", "shotgun", "shotgun", "sniper", "rocket", "grenade"]
 
@@ -21,6 +22,8 @@ var winner: int = -2
 var reason: String = ""
 var score: int = 0                # relative to team 0
 var attacker: int = 0
+var mission: Dictionary = {}      # campaign mission definition (empty in skirmish)
+var is_mission: bool = false
 var last_seen: Array = [{}, {}]   # per team: enemy id -> [x, y] (Dark mode memory)
 
 ## opts: attacker (0/1), bid (charge), bid0/bid1 (charge auction), max_turns, squad (units per side, default 5),
@@ -128,19 +131,23 @@ func fog_clone(team: int):
 	return c
 
 ## True if `team` may give orders to this unit right now.
-func can_order(team: int, u) -> bool:
+func can_order(team: int, u, include_allies: bool = false) -> bool:
 	if u == null or not u.alive:
 		return false
+	if (u.tag == "ally" or u.tag == "leaver") and not include_allies:
+		return false                      # allies are computer-controlled
 	if u.team == team:
+		return true
+	if is_mission and u.team == 2 and u.tag == "rescue" and team == 0:
 		return true
 	return u.team == 2 and team == attacker and mode_name == "hostage" and Modes.hostage_orderable(sim, u)
 
 ## orders: {unit_id: order dict}. Returns the ids that were rejected.
-func submit_orders(team: int, orders: Dictionary) -> Array:
+func submit_orders(team: int, orders: Dictionary, include_allies: bool = false) -> Array:
 	var rejected: Array = []
 	for id in orders.keys():
 		var u = sim.unit(id)
-		if not can_order(team, u):
+		if not can_order(team, u, include_allies):
 			rejected.append(id)
 			continue
 		var ok := true
@@ -182,3 +189,131 @@ func visible_enemy_ids(team: int) -> Array:
 				out.append(u.id)
 		return out
 	return sim.visible_to_team(team)
+
+# ------------------------------------------------------------------ campaign missions
+
+const ALIAS := {
+	"mg": "mg", "sg": "shotgun", "sn": "sniper", "rl": "rocket", "gl": "grenade", "cm": "commando",
+	"dv": "devastator", "rs": "riot", "hk": "hacker", "civ": "civilian", "hos": "hostage",
+}
+
+## "rl:launcher*2" -> two rocket launchers tagged "launcher". Accepts a string or an array of strings.
+static func expand(spec) -> Array:
+	var out: Array = []
+	var items: Array = spec if spec is Array else [spec]
+	for it in items:
+		var s: String = it
+		var count := 1
+		if s.contains("*"):
+			var parts := s.split("*")
+			count = int(parts[1])
+			s = parts[0]
+		var tag := ""
+		if s.contains(":"):
+			var tp := s.split(":")
+			s = tp[0]
+			tag = tp[1]
+		var type: String = ALIAS.get(s, s)
+		for i in range(count):
+			out.append({"type": type, "tag": tag})
+	return out
+
+func _cands(place: String, rng) -> Array:
+	var w: int = sim.map.w
+	var h: int = sim.map.h
+	var out: Array = []
+	match place:
+		"left":
+			out = layout["spawn"][0].duplicate()
+			out.append_array(_near([1, h / 2, 1, h / 2], 30))
+		"right":
+			out = layout["spawn"][1].duplicate()
+			out.append_array(_near([w - 2, h / 2, w - 2, h / 2], 30))
+		"zone":
+			out = _near(layout["zone"], 30)
+		"center":
+			out = _near(layout["center_zone"], 30)
+		"scatter":
+			var pool: Array = []
+			for y in range(1, h - 1):
+				for x in range(w / 3, w - 3):
+					if sim.map.tile(x, y) == 0:
+						pool.append([x, y])
+			for i in range(pool.size() - 1, 0, -1):
+				var j: int = rng.below(i + 1)
+				var t = pool[i]
+				pool[i] = pool[j]
+				pool[j] = t
+			out = pool.slice(0, 60)
+	return out
+
+func _place(group: Array, team: int, place: String, used: Dictionary, rng, default_tag: String = "") -> void:
+	var cands: Array = _cands(place, rng)
+	var k := 0
+	for spec in group:
+		while k < cands.size() and used.has(str(cands[k])):
+			k += 1
+		if k >= cands.size():
+			push_error("mission: no free tile for %s" % spec["type"])
+			return
+		var t: Array = cands[k]
+		used[str(t)] = true
+		var facing: int = 0 if t[0] < sim.map.w / 2 else 1800
+		sim.add_unit(team, spec["type"], t[0], t[1], facing, spec["tag"] if spec["tag"] != "" else default_tag)
+
+static func create_mission(mission: Dictionary):
+	var mt = load("res://sim/match.gd").new()
+	mt.mission = mission
+	mt.is_mission = true
+	mt.mode_name = "mission"
+	mt.dark = mission.get("dark", false)
+	mt.attacker = 0
+	var mp: Dictionary = mission.get("map", {})
+	var seed_value: int = mission.get("seed", 1)
+	mt.layout = MapGen.generate(mp.get("w", 32), mp.get("h", 20), seed_value, 0)
+	mt.sim = Sim.create(mt.layout["rows"], seed_value)
+	mt.sim.turn_ticks = int(mission.get("turn_seconds", 5)) * 20
+	var rng = Rng.new(seed_value ^ 0xC0DE)
+	var used := {}
+	var pp: String = mission.get("player_place", "left")
+	var ep: String = mission.get("enemy_place", "right")
+	mt._place(expand(mission.get("player", [])), 0, pp, used, rng)
+	mt._place(expand(mission.get("allies", [])), 0, mission.get("ally_place", pp), used, rng, "ally")
+	mt._place(expand(mission.get("enemy", [])), 1, ep, used, rng)
+	mt._place(expand(mission.get("neutrals", [])), 2, "center", used, rng)
+	mt._place(expand(mission.get("rescue", [])), 2, "center", used, rng, "rescue")
+	# items, panels, reinforcement tiles
+	var items: Array = mt.layout["boxes"].duplicate()
+	var want: int = mission.get("items", 3)
+	if want > items.size():
+		for t in mt._cands("scatter", rng):
+			if items.size() >= want:
+				break
+			if not used.has(str(t)) and not items.has(t):
+				items.append(t)
+	items = items.slice(0, maxi(want, 1))
+	var panels: Array = []
+	for pd in mission.get("panels", []):
+		var pc: Array = mt._cands(pd.get("at", "zone"), rng)
+		var tile: Array = pc[mini(pd.get("index", 8), pc.size() - 1)]
+		panels.append({"tx": tile[0], "ty": tile[1], "effect": {"kill_tag": pd.get("kill_tag", "")}, "done": false, "ticks": 0})
+	var from: String = mission.get("wave_from", "left" if pp != "left" else "right")
+	var wave_tiles: Array = mt.layout["spawn"][0 if from == "left" else 1].duplicate()
+	var rects := {
+		"zone": mt.layout["zone"], "center": mt.layout["center_zone"],
+		"exit_left": mt.layout["exits"][0], "exit_right": mt.layout["exits"][1],
+	}
+	var init: Array = [0, 0]
+	for u in mt.sim.units:
+		if u.team < 2:
+			init[u.team] += 1
+	mt.sim.mode = MissionRules.build_state(mission, rects, items, panels, wave_tiles, int(mission.get("turns", 8)), init)
+	mt._init_seen()
+	return mt
+
+func objective_lines() -> Array:
+	var out: Array = []
+	if is_mission:
+		for o in sim.mode["objectives"]:
+			out.append(("[x] " if MissionRules.objective_done(sim, sim.mode, o, turn) else "[ ] ") + MissionRules.describe(o))
+	return out

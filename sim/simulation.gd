@@ -20,6 +20,7 @@ var rng                        # kept for modes/AI that need seeded choices
 var mode: Dictionary = {}      # game-mode state, see modes.gd
 var tick: int = 0
 var turn_no: int = 1           # 1-based number of the turn being (or about to be) played
+var turn_ticks: int = Balance.TICKS_PER_TURN   # 100 = 5 s; campaign missions may use longer turns
 var events: Array = []         # replay events for the last run_turn
 var frames: Array = []         # per-tick snapshots for the last run_turn
 var _next_id: int = 1
@@ -32,7 +33,7 @@ static func create(rows: Array, seed_value: int = 1):
 	return s
 
 ## Adds a unit at the centre of tile (tx,ty). Returns the unit id.
-func add_unit(team: int, type: String, tx: int, ty: int, facing: int = 0) -> int:
+func add_unit(team: int, type: String, tx: int, ty: int, facing: int = 0, tag: String = "") -> int:
 	var u = SimUnit.new()
 	u.id = _next_id
 	_next_id += 1
@@ -41,6 +42,7 @@ func add_unit(team: int, type: String, tx: int, ty: int, facing: int = 0) -> int
 	u.x = tx * Fx.TILE + 500
 	u.y = ty * Fx.TILE + 500
 	u.facing = facing
+	u.tag = tag
 	units.append(u)
 	return u.id
 
@@ -99,7 +101,7 @@ func run_turn() -> void:
 	frames = []
 	tick = 0
 	_snapshot()
-	for i in range(Balance.TICKS_PER_TURN):
+	for i in range(turn_ticks):
 		step()
 		_snapshot()
 
@@ -482,9 +484,9 @@ func _snapshot() -> void:
 	for p in projectiles:
 		ps.append([p["kind"], p["x"], p["y"], false])
 	var bs: Array = []
-	if not mode.is_empty() and mode["type"] == "disputed":
+	if not mode.is_empty() and mode.has("boxes"):
 		for b in mode["boxes"]:
-			bs.append([b["x"], b["y"], b["delivered"] or not mode["active"]])
+			bs.append([b["x"], b["y"], b["delivered"] or b.get("lost", false) or not mode["active"]])
 	frames.append({"u": us, "p": ps, "b": bs})
 
 func to_dict() -> Dictionary:
@@ -494,7 +496,7 @@ func to_dict() -> Dictionary:
 	return {
 		"w": map.w, "h": map.h, "tiles": Array(map.t), "units": us,
 		"projectiles": projectiles.duplicate(true), "mode": mode.duplicate(true), "rng": rng.s,
-		"tick": tick, "turn_no": turn_no, "next_id": _next_id,
+		"tick": tick, "turn_no": turn_no, "turn_ticks": turn_ticks, "next_id": _next_id,
 	}
 
 static func from_dict(d: Dictionary):
@@ -507,6 +509,7 @@ static func from_dict(d: Dictionary):
 	s.rng.s = d["rng"]
 	s.tick = d["tick"]
 	s.turn_no = d["turn_no"]
+	s.turn_ticks = d["turn_ticks"]
 	s._next_id = d["next_id"]
 	s.projectiles = d["projectiles"].duplicate(true)
 	s.mode = d["mode"].duplicate(true)

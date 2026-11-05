@@ -5,6 +5,8 @@ const Match = preload("res://sim/match.gd")
 const AI = preload("res://sim/ai.gd")
 const Board = preload("res://ui/board.gd")
 const Balance = preload("res://sim/balance.gd")
+const CampaignData = preload("res://campaign/campaign_data.gd")
+const MissionRules = preload("res://sim/mission.gd")
 
 const MODES := ["extermination", "secure", "disputed", "hostage", "charge", "upload"]
 const MODE_TEXT := {
@@ -23,6 +25,17 @@ var plan_team := 0
 var committed := {}
 var phase := "menu"
 var last_replay := {}
+var campaign_mode := false
+var campaign_pack: Dictionary = {}
+var campaign_mission: Dictionary = {}
+var progress: Dictionary = {}
+var unlock_all := false
+var campaign_box: Control
+var campaign_list: VBoxContainer
+var pack_opt: OptionButton
+var packs: Array = []
+var overlay_btn2: Button
+var overlay_action2: Callable
 
 # widgets
 var menu_box: Control
@@ -46,7 +59,9 @@ var pause_btn: Button
 var _updating_slider := false
 
 func _ready() -> void:
+	progress = CampaignData.load_progress()
 	_build_menu()
+	_build_campaign()
 	_build_game()
 	_build_overlay()
 	_show_phase("menu")
@@ -110,8 +125,93 @@ func _build_menu() -> void:
 	squad_spin.value = 5
 	v.add_child(_label("Units per side"))
 	v.add_child(squad_spin)
-	v.add_child(_button("Start", _on_start))
+	v.add_child(_button("Start skirmish", _on_start))
+	v.add_child(_button("Campaign and mission packs", _open_campaign))
 	v.add_child(_button("Quit", func(): get_tree().quit()))
+
+func _build_campaign() -> void:
+	campaign_box = PanelContainer.new()
+	campaign_box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(campaign_box)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 8)
+	campaign_box.add_child(v)
+	var top := HBoxContainer.new()
+	v.add_child(top)
+	top.add_child(_label("Campaign", 28))
+	pack_opt = OptionButton.new()
+	packs = CampaignData.list_packs()
+	for pk in packs:
+		pack_opt.add_item("%s  (%d missions)" % [pk["title"], pk["flat"].size()])
+	pack_opt.item_selected.connect(func(_i): _refresh_campaign())
+	top.add_child(pack_opt)
+	var unlock := CheckBox.new()
+	unlock.text = "Unlock all missions"
+	unlock.toggled.connect(func(on): unlock_all = on; _refresh_campaign())
+	top.add_child(unlock)
+	top.add_child(_button("Back", func(): _show_phase("menu")))
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	v.add_child(scroll)
+	campaign_list = VBoxContainer.new()
+	campaign_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	campaign_list.add_theme_constant_override("separation", 4)
+	scroll.add_child(campaign_list)
+
+func _open_campaign() -> void:
+	_show_phase("campaign")
+	_refresh_campaign()
+
+func _refresh_campaign() -> void:
+	for ch in campaign_list.get_children():
+		ch.queue_free()
+	if packs.is_empty():
+		return
+	campaign_pack = packs[pack_opt.selected]
+	var done_n := 0
+	for item in campaign_pack["flat"]:
+		if CampaignData.is_done(progress, campaign_pack["id"], item["mission"]["id"]):
+			done_n += 1
+	var blurb := _label("%s — %d / %d complete" % [campaign_pack["blurb"], done_n, campaign_pack["flat"].size()], 14)
+	campaign_list.add_child(blurb)
+	for ci in range(campaign_pack["chapters"].size()):
+		var chap: Dictionary = campaign_pack["chapters"][ci]
+		var head := _label("%d. %s" % [ci + 1, chap["title"]], 20)
+		head.add_theme_color_override("font_color", Color("5cc8ff"))
+		campaign_list.add_child(head)
+		var row := HBoxContainer.new()
+		campaign_list.add_child(row)
+		for m in chap["missions"]:
+			var done: bool = CampaignData.is_done(progress, campaign_pack["id"], m["id"])
+			var b := Button.new()
+			b.text = "%s%d  %s" % ["✓ " if done else "", m["id"], m["title"]]
+			b.disabled = not CampaignData.is_unlocked(progress, campaign_pack["id"], m["id"], unlock_all)
+			b.focus_mode = Control.FOCUS_NONE
+			var mm: Dictionary = m
+			var cc: int = ci
+			b.pressed.connect(func(): _show_briefing(cc, mm))
+			row.add_child(b)
+
+func _show_briefing(ci: int, m: Dictionary) -> void:
+	var chap: Dictionary = campaign_pack["chapters"][ci]
+	var probe = Match.create_mission(m)
+	var txt := "%s\n\n" % chap["title"]
+	if chap["missions"][0]["id"] == m["id"]:
+		txt += chap["intro"] + "\n\n"
+	txt += "Mission %d — %s\n%s\n\n%s\n\nYour squad: %d   Enemy: %d   Turns: %d%s" % [
+		m["id"], m["title"], m["brief"], "\n".join(probe.objective_lines()),
+		probe.sim.alive_count(0), probe.sim.alive_count(1), m.get("turns", 8), "   (Dark)" if m.get("dark", false) else ""]
+	_show_overlay(txt, "Start mission", func(): _start_mission(m), "Back", func(): _show_phase("campaign"))
+
+func _start_mission(m: Dictionary) -> void:
+	campaign_mode = true
+	campaign_mission = m
+	vs_ai = true
+	game = Match.create_mission(m)
+	board.set_game(game)
+	committed = {}
+	last_replay = {}
+	_begin_turn()
 
 func _build_game() -> void:
 	game_box = HBoxContainer.new()
@@ -186,28 +286,39 @@ func _build_overlay() -> void:
 	v.add_child(overlay_label)
 	overlay_btn = _button("OK", func(): overlay.visible = false; overlay_action.call())
 	v.add_child(overlay_btn)
+	overlay_btn2 = _button("Cancel", func(): overlay.visible = false; overlay_action2.call())
+	overlay_btn2.visible = false
+	v.add_child(overlay_btn2)
 	overlay.visible = false
 
-func _show_overlay(text: String, button: String, action: Callable) -> void:
+func _show_overlay(text: String, button: String, action: Callable, button2: String = "", action2: Callable = Callable()) -> void:
 	overlay_label.text = text
+	overlay_label.add_theme_font_size_override("font_size", 20 if button2 != "" else 28)
+	overlay_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	overlay_label.custom_minimum_size = Vector2(900 if button2 != "" else 0, 0)
 	overlay_btn.text = button
 	overlay_action = action
+	overlay_btn2.visible = button2 != ""
+	overlay_btn2.text = button2
+	overlay_action2 = action2
 	overlay.visible = true
 
 # ------------------------------------------------------------------ flow
 
 func _show_phase(p: String) -> void:
 	phase = p
-	menu_box.get_parent().get_child(0).visible = (p == "menu")  # backdrop
+	menu_box.get_parent().get_child(0).visible = (p == "menu" or p == "campaign")  # backdrop
 	menu_box.visible = (p == "menu")
-	game_box.visible = (p != "menu")
-	if p == "menu":
+	campaign_box.visible = (p == "campaign")
+	game_box.visible = (p != "menu" and p != "campaign")
+	if p == "menu" or p == "campaign":
 		overlay.visible = false
 	plan_buttons.visible = (p == "plan")
 	replay_buttons.visible = (p == "replay")
 	_refresh_side()
 
 func _on_start() -> void:
+	campaign_mode = false
 	vs_ai = opp_opt.selected == 0
 	var opts := {"squad": int(squad_spin.value)}
 	var mode: String = MODES[mode_opt.selected]
@@ -253,7 +364,9 @@ func _refresh_side() -> void:
 	var s := "%s\nTurn %d — %s%s\n\n%s\n" % [
 		game.mode_name.capitalize(), game.turn + 1,
 		"Dark" if game.dark else "Light", "" if not game.over else " (over)",
-		MODE_TEXT[game.mode_name]]
+		MODE_TEXT.get(game.mode_name, "")]
+	if game.is_mission:
+		s = "%s %d — %s\nTurn %d of %d%s\n\n%s\n\n%s\n" % [campaign_pack.get("title", "Mission"), campaign_mission.get("id", 0), campaign_mission.get("title", ""), game.turn + 1, campaign_mission.get("turns", 8), " (Dark)" if game.dark else "", campaign_mission.get("brief", ""), "\n".join(game.objective_lines())]
 	if phase == "plan":
 		s += "\nPlanning: %s" % _team_name(plan_team)
 	elif phase == "replay":
@@ -296,7 +409,15 @@ func _on_commit() -> void:
 		return
 	committed[plan_team] = board.orders.duplicate(true)
 	if vs_ai:
-		committed[1] = AI.plan(game, 1, int(seed_spin.value))
+		var sd: int = int(seed_spin.value) + (campaign_mission.get("seed", 0) if campaign_mode else 0)
+		committed[1] = AI.plan(game, 1, sd)
+		if campaign_mode:
+			var ally_ids: Array = []
+			for u in game.sim.units:
+				if u.alive and u.team == 0 and (u.tag == "ally" or u.tag == "leaver"):
+					ally_ids.append(u.id)
+			if not ally_ids.is_empty():
+				committed[0].merge(AI.plan(game, 0, sd, 6, ally_ids))
 		_run_turn()
 	elif plan_team == 0:
 		_pass_to(1)
@@ -306,7 +427,7 @@ func _on_commit() -> void:
 func _run_turn() -> void:
 	var pending := {}
 	for t in committed.keys():
-		game.submit_orders(t, committed[t])
+		game.submit_orders(t, committed[t], true)
 		pending.merge(committed[t])
 	var before = game.sim.map.duplicate_map()
 	game.play_turn(pending)
@@ -329,6 +450,14 @@ func _on_replay_finished(was_test: bool) -> void:
 
 func _show_end() -> void:
 	phase = "over"
+	if campaign_mode:
+		var won: bool = game.winner == 0
+		if won:
+			CampaignData.mark_done(progress, campaign_pack["id"], campaign_mission["id"])
+			CampaignData.save_progress(progress)
+		var nxt := "Mission complete — %s." % game.reason if won else "Mission failed — %s." % game.reason
+		_show_overlay(nxt, "Back to missions", func(): _open_campaign(), "Retry" if not won else "", func(): _start_mission(campaign_mission))
+		return
 	var txt := "Draw — %s" % game.reason
 	if game.winner >= 0:
 		txt = "%s wins — %s" % [_team_name(game.winner), game.reason]

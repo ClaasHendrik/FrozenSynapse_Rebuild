@@ -1,0 +1,407 @@
+{
+ "id": "bonus",
+ "title": "Blackout Pack",
+ "blurb": "Twelve original missions: night ops, heavy weapons, snipers and a final stand.",
+ "chapters": [
+  {
+   "title": "Night Shift",
+   "intro": "A series of quiet jobs in the dark hours. Nobody is expecting you.",
+   "missions": [
+    {
+     "id": 1,
+     "title": "Lights Out",
+     "brief": "Cut the power and clear the floor while nobody can see.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1050,
+     "dark": true
+    },
+    {
+     "id": 2,
+     "title": "Dead Drop",
+     "brief": "Collect two packages and be gone before the guards change shift.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 2
+      }
+     ],
+     "player": [
+      "mg",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1087,
+     "dark": true,
+     "items": 3
+    },
+    {
+     "id": 3,
+     "title": "Skeleton Crew",
+     "brief": "A skeleton crew guards the lobby. Find out how skeleton.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "cm*2",
+      "mg",
+      "sn"
+     ],
+     "enemy": [
+      "mg*2",
+      "sn",
+      "sg"
+     ],
+     "turns": 6,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1124,
+     "dark": true
+    }
+   ]
+  },
+  {
+   "title": "Iron Rain",
+   "intro": "Heavy weapons and heavy walls. Break stone, break lines.",
+   "missions": [
+    {
+     "id": 4,
+     "title": "Rubble",
+     "brief": "The Devastator can level a block. Let it, and then walk through.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "dv",
+      "mg",
+      "sg*2"
+     ],
+     "enemy": [
+      "mg*4",
+      "sg*2",
+      "rl"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 36,
+      "h": 22
+     },
+     "seed": 1161
+    },
+    {
+     "id": 5,
+     "title": "Bombardment",
+     "brief": "Two rocket launchers and two grenadiers against a fortified block. Pick your holes.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "rl*2",
+      "gl*2",
+      "mg",
+      "sg"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn",
+      "sg*2"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1198
+    },
+    {
+     "id": 6,
+     "title": "Hold the Rubble",
+     "brief": "Everything they have, coming at once. Hold the broken tower for seven turns.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 7,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "dv",
+      "mg*2",
+      "sg",
+      "rl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2"
+     ],
+     "turns": 7,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1235,
+     "player_place": "zone",
+     "enemy_place": "left",
+     "events": [
+      {
+       "turn": 2,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 4,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 6,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Quiet Hands",
+   "intro": "Snipers, ambushes and patience. Every shot counts.",
+   "missions": [
+    {
+     "id": 7,
+     "title": "The Long Gallery",
+     "brief": "A long gallery with a sniper at each end. Do not cross the middle.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "sn*2",
+      "mg",
+      "sg*2"
+     ],
+     "enemy": [
+      "sn*2",
+      "mg*2",
+      "sg"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 40,
+      "h": 18
+     },
+     "seed": 1272
+    },
+    {
+     "id": 8,
+     "title": "Overwatch",
+     "brief": "Your sniper team escorts a courier across the roofs.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "exit_right",
+       "hold": 2,
+       "tag": "vip"
+      }
+     ],
+     "player": [
+      "sn*2",
+      "mg",
+      "sg",
+      "civ:vip"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1309,
+     "enemy_place": "scatter"
+    },
+    {
+     "id": 9,
+     "title": "Silent Entry",
+     "brief": "Reach the archive in the dark without a single raised voice.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "sg*3",
+      "mg",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn",
+      "sg*2"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1346,
+     "dark": true,
+     "enemy_place": "zone"
+    }
+   ]
+  },
+  {
+   "title": "Last Call",
+   "intro": "One more night, one last job, and the whole crew.",
+   "missions": [
+    {
+     "id": 10,
+     "title": "Closing Time",
+     "brief": "The bar is full of armed regulars. Clear it before the doors lock.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*3",
+      "sn"
+     ],
+     "enemy": [
+      "mg*4",
+      "sg*2",
+      "sn"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 30,
+      "h": 18
+     },
+     "seed": 1383
+    },
+    {
+     "id": 11,
+     "title": "The Big Score",
+     "brief": "Four crates in the vault, six guards in the way.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 4
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn",
+      "rl"
+     ],
+     "turns": 12,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1420,
+     "items": 5,
+     "dark": true
+    },
+    {
+     "id": 12,
+     "title": "Last Call",
+     "brief": "The Tactician against everything. Make it count.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "dv",
+      "rs",
+      "mg*2",
+      "sg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*4",
+      "sg*3",
+      "sn*2",
+      "rl*2"
+     ],
+     "turns": 12,
+     "map": {
+      "w": 40,
+      "h": 22
+     },
+     "seed": 1457
+    }
+   ]
+  }
+ ]
+}

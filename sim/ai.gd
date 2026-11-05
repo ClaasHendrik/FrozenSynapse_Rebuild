@@ -11,12 +11,17 @@ const Modes = preload("res://sim/modes.gd")
 
 const CANDIDATES := 14
 
-static func plan(game, team: int, seed_value: int = 1, candidates: int = CANDIDATES) -> Dictionary:
+static func plan(game, team: int, seed_value: int = 1, candidates: int = CANDIDATES, only_ids: Array = []) -> Dictionary:
 	var rng = Rng.new(seed_value * 31 + team * 7 + game.turn * 101 + 5)
 	var base = game.fog_clone(team)
 	var mine: Array = []
 	for u in base.units:
-		if u.alive and game.can_order(team, game.sim.unit(u.id)):
+		if not u.alive:
+			continue
+		if not only_ids.is_empty():
+			if only_ids.has(u.id):
+				mine.append(u)
+		elif game.can_order(team, game.sim.unit(u.id)):
 			mine.append(u)
 	var known: Array = []   # enemy units (alive in fogged clone)
 	for u in base.units:
@@ -43,6 +48,8 @@ static func _is_attacker(game, team: int) -> bool:
 	var m: Dictionary = game.sim.mode
 	if m["type"] == "extermination" or m["type"] == "disputed":
 		return true
+	if m["type"] == "mission":
+		return team == 0 or m["enemy_style"] != "defend"
 	return m["attacker"] == team
 
 static func _dest_for(game, base, u, known: Array) -> Array:

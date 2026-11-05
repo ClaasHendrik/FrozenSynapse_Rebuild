@@ -413,6 +413,30 @@ func _draw_objectives(f: int) -> void:
 	var md: Dictionary = game.sim.mode
 	var yellow := Color(1.0, 0.82, 0.29, 0.9)
 	match md.get("type", ""):
+		"mission":
+			var shown := {}
+			for o in md["objectives"]:
+				for r in o["rects"]:
+					if o["type"] != "collect" and not shown.has(str(r)):
+						shown[str(r)] = true
+						draw_rect(Rect2(origin + Vector2(r[0], r[1]) * ts, Vector2(r[2] - r[0] + 1, r[3] - r[1] + 1) * ts), Color(1, 0.82, 0.29, 0.12))
+						draw_rect(Rect2(origin + Vector2(r[0], r[1]) * ts, Vector2(r[2] - r[0] + 1, r[3] - r[1] + 1) * ts), yellow, false, 2.0)
+			if md.has("boxes") or md["rescued"] >= 0 and _mission_uses_exits(md):
+				for t in range(2):
+					var ex: Array = md["exits"][t]
+					draw_rect(Rect2(origin + Vector2(ex[0], ex[1]) * ts, Vector2(ex[2] - ex[0] + 1, ex[3] - ex[1] + 1) * ts), Color(0.3, 1, 0.5, 0.1))
+			var mboxes: Array = []
+			if phase == "replay" and f < rframes.size() and not rframes[f]["b"].is_empty():
+				mboxes = rframes[f]["b"]
+			elif md.has("boxes"):
+				for b in md["boxes"]:
+					mboxes.append([b["x"], b["y"], b["delivered"] or b["lost"]])
+			for b in mboxes:
+				if not b[2]:
+					draw_rect(Rect2(_p(b[0], b[1]) - Vector2(ts, ts) * 0.2, Vector2(ts, ts) * 0.4), yellow)
+			for pn in md["panels"]:
+				var pc := Color(0.4, 0.9, 1.0, 0.35 if pn["done"] else 0.9)
+				draw_rect(Rect2(origin + Vector2(pn["tx"], pn["ty"]) * ts + Vector2(ts, ts) * 0.2, Vector2(ts, ts) * 0.6), pc, false, 2.0)
 		"secure":
 			var z: Array = md["zone"]
 			draw_rect(Rect2(origin + Vector2(z[0], z[1]) * ts, Vector2(z[2] - z[0] + 1, z[3] - z[1] + 1) * ts), Color(1, 0.82, 0.29, 0.14))
@@ -443,6 +467,12 @@ func _draw_objectives(f: int) -> void:
 			var bx: int = md["bid"] if md["attacker"] == 0 else md["w"] - 1 - md["bid"]
 			var x := origin.x + (bx + (0.5)) * ts
 			draw_line(Vector2(x, origin.y), Vector2(x, origin.y + game.sim.map.h * ts), yellow, 2.0)
+
+func _mission_uses_exits(md: Dictionary) -> bool:
+	for o in md["objectives"]:
+		if o["type"] == "rescue" or o["type"] == "collect" or o.get("zone", "") == "exit_any" or o.get("zone", "").begins_with("exit"):
+			return true
+	return false
 
 func _tiles_at(f: int) -> PackedByteArray:
 	var t: PackedByteArray = _base_tiles.duplicate()

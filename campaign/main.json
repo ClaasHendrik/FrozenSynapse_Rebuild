@@ -1,0 +1,1985 @@
+{
+ "id": "main",
+ "title": "Campaign",
+ "blurb": "55 missions in 19 chapters.",
+ "chapters": [
+  {
+   "title": "Nashar Ward",
+   "intro": "You are the Tactician, the analyst behind Petrov's Splinter, a small resistance cell fighting Enyo:Drift for control of Marcov Geist. Your first job is to pull a deep-cover agent, Kate Soulsbury, out of the corporation.",
+   "missions": [
+    {
+     "id": 1,
+     "title": "Incursion",
+     "brief": "Strike fast. The Commandos can outrun any ambush, so never end a turn standing in the open.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "cm*3"
+     ],
+     "enemy": [
+      "mg*2",
+      "sg"
+     ],
+     "turns": 6,
+     "map": {
+      "w": 28,
+      "h": 18
+     },
+     "seed": 1037
+    },
+    {
+     "id": 2,
+     "title": "Slaughter",
+     "brief": "A work crew has been armed and posted as bait. Spread your guns across open ground and cut them down.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2"
+     ],
+     "enemy": [
+      "civ*6",
+      "mg"
+     ],
+     "turns": 6,
+     "map": {
+      "w": 28,
+      "h": 18
+     },
+     "seed": 1074
+    },
+    {
+     "id": 3,
+     "title": "Extraction",
+     "brief": "Keep Kate alive and walk her to the eastern edge. Reinforcements will pour in from the north and south.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "exit_right",
+       "hold": 2,
+       "tag": "vip"
+      }
+     ],
+     "player": [
+      "mg",
+      "sg",
+      "cm",
+      "civ:vip"
+     ],
+     "enemy": [
+      "mg*2"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 18
+     },
+     "seed": 1111,
+     "events": [
+      {
+       "turn": 2,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "shotgun"
+        }
+       ]
+      },
+      {
+       "turn": 4,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Power Station",
+   "intro": "The Panarchists will back the Splinter if it takes the power station, where their vat-forms are built. It is your first real operation.",
+   "missions": [
+    {
+     "id": 4,
+     "title": "Incursion",
+     "brief": "Use cover, duck when your weapon would lose the exchange, and keep the shotguns for corners.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1148
+    },
+    {
+     "id": 5,
+     "title": "The Breach",
+     "brief": "Hold the control room for six turns. A few jumpy allies will help; place your guns so each door is covered.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 6,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "mg",
+      "sg*2"
+     ],
+     "enemy": [
+      "mg*2"
+     ],
+     "turns": 6,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1185,
+     "player_place": "zone",
+     "allies": [
+      "mg*2"
+     ],
+     "events": [
+      {
+       "turn": 2,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "shotgun"
+        }
+       ]
+      },
+      {
+       "turn": 3,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 4,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "shotgun"
+        }
+       ]
+      }
+     ],
+     "enemy_place": "left"
+    },
+    {
+     "id": 6,
+     "title": "Assassination",
+     "brief": "Two rocket launchers guard the target. Kill them early, before they blow your cover away, then focus the marked man.",
+     "objectives": [
+      {
+       "type": "kill_target"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2"
+     ],
+     "enemy": [
+      "rl*2",
+      "mg:target",
+      "mg",
+      "sg*2"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1222
+    }
+   ]
+  },
+  {
+   "title": "The Broadcast Studio",
+   "intro": "Nox wants to tell the city how the Shape is being used to control it. Your job is to storm the station and keep him on air.",
+   "missions": [
+    {
+     "id": 7,
+     "title": "Incursion",
+     "brief": "Get a unit into the guarded zone, and keep Davies behind cover. Two units on one enemy in a corridor is a fair trade.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg",
+      "sg*2",
+      "civ:vip"
+     ],
+     "enemy": [
+      "mg*4"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1259,
+     "enemy_place": "zone"
+    },
+    {
+     "id": 8,
+     "title": "Clearance",
+     "brief": "A sniper and a grenadier cover the hall. Do not rush them: take the sniper close, the grenadier at any range.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "sn",
+      "gl",
+      "mg*2"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1296
+    },
+    {
+     "id": 9,
+     "title": "Broadcast",
+     "brief": "Collect the key crates and run for the edge. You only need three, but kill the rocket launcher first.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "rl",
+      "mg*2",
+      "sn",
+      "sg"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1333,
+     "items": 5
+    }
+   ]
+  },
+  {
+   "title": "Blue Daylight",
+   "intro": "To keep the Panarchists on side, the Splinter must break the Blue Daylight cult. You will strike three of its strongholds.",
+   "missions": [
+    {
+     "id": 10,
+     "title": "Defend the Barracks",
+     "brief": "Hold a zone with too many windows against two snipers. Duck, wait, stand. Do not blow up your own cover.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 8,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg",
+      "rl"
+     ],
+     "enemy": [
+      "sn*2",
+      "mg*2",
+      "sg"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1370,
+     "player_place": "zone",
+     "enemy_place": "left"
+    },
+    {
+     "id": 11,
+     "title": "Attack the Chapel",
+     "brief": "Shotguns win up close and die in the open. Cover every step until you are in range.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "sg*3",
+      "mg"
+     ],
+     "enemy": [
+      "sn*3",
+      "mg"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 36,
+      "h": 20
+     },
+     "seed": 1407,
+     "enemy_place": "zone"
+    },
+    {
+     "id": 12,
+     "title": "Projector Takedown",
+     "brief": "Reach the projector room. A panel in the middle of the complex disables their launcher if you step on it.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "rl:launcher",
+      "mg",
+      "sg*2"
+     ],
+     "turns": 9,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1444,
+     "enemy_place": "zone",
+     "panels": [
+      {
+       "at": "center",
+       "kill_tag": "launcher"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Cairn Dwelling",
+   "intro": "Cairn Dwelling is the Panarchists' crowning achievement, and Enyo:Drift is attacking it. Help them drive the assault back.",
+   "missions": [
+    {
+     "id": 13,
+     "title": "Defend the Dwelling",
+     "brief": "Your first rocket launcher. It destroys cover, which is a gift to you and to the enemy, and its blasts hurt friends.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 7,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg",
+      "rl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg"
+     ],
+     "turns": 7,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1481,
+     "player_place": "zone",
+     "enemy_place": "left",
+     "events": [
+      {
+       "turn": 3,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 5,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "shotgun"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 14,
+     "title": "Push Back",
+     "brief": "Reach the marked zone within ten turns to stop their reinforcements. Their sniper owns the open ground.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "rl"
+     ],
+     "enemy": [
+      "sn",
+      "mg*3",
+      "sg"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1518,
+     "enemy_place": "zone"
+    },
+    {
+     "id": 15,
+     "title": "Shape Purge",
+     "brief": "Carry data from three nodes to the edge. Three rocket launchers will make it hard. An access panel can silence them.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "rl:launcher*3",
+      "mg*2"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1555,
+     "items": 5,
+     "panels": [
+      {
+       "at": "zone",
+       "kill_tag": "launcher",
+       "index": 10
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Novena Quarter",
+   "intro": "To win the Blade's support, Nox must meet their leader, Eshe, in person. Clear the area and see him there alive.",
+   "missions": [
+    {
+     "id": 16,
+     "title": "Defend the Base",
+     "brief": "The Blade's base is under attack. An allied Commando will help for one turn, then leave. Kill all but one attacker.",
+     "objectives": [
+      {
+       "type": "eliminate",
+       "leave": 1
+      }
+     ],
+     "player": [
+      "mg",
+      "gl",
+      "sg"
+     ],
+     "enemy": [
+      "mg*4",
+      "sg"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1592,
+     "player_place": "zone",
+     "enemy_place": "left",
+     "allies": [
+      "cm:leaver"
+     ],
+     "events": [
+      {
+       "turn": 2,
+       "remove_tag": "leaver"
+      }
+     ]
+    },
+    {
+     "id": 17,
+     "title": "Counter",
+     "brief": "Take the fight to them. Rocket launchers in the centre make cover dangerous, so get the shotgun in fast.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2"
+     ],
+     "enemy": [
+      "rl*2",
+      "sg",
+      "mg"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1629,
+     "enemy_place": "zone"
+    },
+    {
+     "id": 18,
+     "title": "The Meeting",
+     "brief": "Escort Nox across the map. A sniper with the longest sight line and a fast shotgun make the best bodyguards.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "exit_right",
+       "hold": 2,
+       "tag": "vip"
+      }
+     ],
+     "player": [
+      "sn",
+      "sg",
+      "mg",
+      "civ:vip"
+     ],
+     "enemy": [
+      "mg*2",
+      "sn",
+      "sg"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1666,
+     "enemy_place": "scatter"
+    }
+   ]
+  },
+  {
+   "title": "Ninstar Tower",
+   "intro": "Enyo:Drift is attacking the Ninstar headquarters. Your new allies need your help to survive the night.",
+   "missions": [
+    {
+     "id": 19,
+     "title": "The Lobby",
+     "brief": "The Ninstar units near the enemy are lost. Flank around the walls and use the rocket launcher to blow holes.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "rl"
+     ],
+     "enemy": [
+      "mg*4",
+      "sg",
+      "sn"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1703,
+     "allies": [
+      "mg*3"
+     ],
+     "ally_place": "center"
+    },
+    {
+     "id": 20,
+     "title": "Second Floor",
+     "brief": "Hold the small area while civilians run for their lives. Use shotguns at the entries and rockets to deny ground.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 8,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "sg*2",
+      "mg",
+      "rl*2"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn",
+      "mg",
+      "sg"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1740,
+     "player_place": "zone",
+     "enemy_place": "left",
+     "neutrals": [
+      "hos*3"
+     ]
+    },
+    {
+     "id": 21,
+     "title": "The Corridor",
+     "brief": "Play defensive from good positions and use indirect fire to push them into you. Then clear what is left.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "gl",
+      "sg",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg",
+      "rl",
+      "gl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1777
+    }
+   ]
+  },
+  {
+   "title": "Dillenger's Villa",
+   "intro": "Dillenger, a rich engineer inside Enyo:Drift, knows where the corporation keeps its secret base. Storm his fortified home and make him talk.",
+   "missions": [
+    {
+     "id": 22,
+     "title": "Break the Compound",
+     "brief": "Walls, windows and unknowns. Scout carefully and break up their line.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "rl",
+      "sn"
+     ],
+     "enemy": [
+      "mg*4",
+      "sn",
+      "sg*2"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1814,
+     "dark": true,
+     "enemy_place": "zone"
+    },
+    {
+     "id": 23,
+     "title": "Security Takedown",
+     "brief": "Three gun turrets guard the villa. Destroy all of them. They will not move.",
+     "objectives": [
+      {
+       "type": "kill_target"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "gl",
+      "sn"
+     ],
+     "enemy": [
+      "mg:target*3",
+      "sg"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1851,
+     "enemy_place": "zone",
+     "enemy_style": "defend"
+    },
+    {
+     "id": 24,
+     "title": "The Negotiation",
+     "brief": "Reach Dillenger's study and hold it long enough to make your point.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*3",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn",
+      "sg*2",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1888,
+     "dark": true,
+     "enemy_place": "zone"
+    }
+   ]
+  },
+  {
+   "title": "Site 77",
+   "intro": "Site 77 is where Enyo:Drift hides its black projects. Break in, take what you can, and leave it in pieces.",
+   "missions": [
+    {
+     "id": 25,
+     "title": "Gain Access",
+     "brief": "Get a unit into the inner area. Their rockets will punish any squad that stops moving.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "mg*2",
+      "sg",
+      "sn",
+      "rl*2"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1925,
+     "dark": true,
+     "enemy_place": "zone",
+     "enemy_style": "defend"
+    },
+    {
+     "id": 26,
+     "title": "Data Harvest",
+     "brief": "Carry four data cores out of the complex. Six are available, so pick the ones the guards cannot cover.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 4
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*4",
+      "sg",
+      "sn",
+      "gl"
+     ],
+     "turns": 12,
+     "map": {
+      "w": 36,
+      "h": 20
+     },
+     "seed": 1962,
+     "dark": true,
+     "items": 6
+    },
+    {
+     "id": 27,
+     "title": "Set Up the Bomb",
+     "brief": "Your demolitions expert has to reach the reactor room and survive 2 seconds there. Do not lose him.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 2,
+       "tag": "vip"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "civ:vip"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg",
+      "sn",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1999,
+     "enemy_place": "zone"
+    }
+   ]
+  },
+  {
+   "title": "The Devastator",
+   "intro": "Among the plans stolen from Site 77 is a walking rocket platform. The Splinter has built one of its own.",
+   "missions": [
+    {
+     "id": 28,
+     "title": "First Encounter",
+     "brief": "The Devastator fires several rockets per turn. Do not hold back: two to five shots every round.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "dv",
+      "mg",
+      "sg"
+     ],
+     "enemy": [
+      "mg*5"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2036
+    },
+    {
+     "id": 29,
+     "title": "Steal the Plans",
+     "brief": "Carry the plans to the edge. Let the Devastator break open the buildings while the others guard it.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 3
+      }
+     ],
+     "player": [
+      "dv",
+      "mg",
+      "sg*2"
+     ],
+     "enemy": [
+      "mg*4",
+      "rl",
+      "sn",
+      "sg"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2073,
+     "items": 4
+    },
+    {
+     "id": 30,
+     "title": "Facility Takedown",
+     "brief": "Wipe the facility out. Keep the Devastator behind your guns and let it flatten the map.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "dv",
+      "mg*2",
+      "sg"
+     ],
+     "enemy": [
+      "mg*4",
+      "sg*2",
+      "sn",
+      "rl",
+      "gl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 36,
+      "h": 22
+     },
+     "seed": 2110
+    }
+   ]
+  },
+  {
+   "title": "Brightmoor",
+   "intro": "Brightmoor University is the heart of the Blue Daylight cult, and Emmanuele is its quiet prophet. The Splinter moves in.",
+   "missions": [
+    {
+     "id": 31,
+     "title": "Daylight Raid",
+     "brief": "Scout, then strike. Two snipers cover the lawns, so approach from the sides.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*2",
+      "sg*2",
+      "sn*2"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2147,
+     "dark": true
+    },
+    {
+     "id": 32,
+     "title": "Hostage Situation",
+     "brief": "Two students are held at the centre. Get them to the edge. They run straight, so clear the path first.",
+     "objectives": [
+      {
+       "type": "rescue",
+       "count": 2
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2184,
+     "rescue": [
+      "hos*2"
+     ],
+     "enemy_place": "center"
+    },
+    {
+     "id": 33,
+     "title": "Emmanuele's Doubt",
+     "brief": "Emmanuele is hiding among his guards. Find him in the dark and bring him down.",
+     "objectives": [
+      {
+       "type": "kill_target"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "sg:target",
+      "mg*2",
+      "gl",
+      "sn"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2221,
+     "dark": true,
+     "enemy_place": "zone"
+    }
+   ]
+  },
+  {
+   "title": "Brightmoor Core",
+   "intro": "Under the campus the cult has opened a way into the Shape itself. You have to shut it.",
+   "missions": [
+    {
+     "id": 34,
+     "title": "Connection",
+     "brief": "Gather three data cores from the cult's servers while their rocket launcher keeps you moving.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2258,
+     "dark": true,
+     "items": 4
+    },
+    {
+     "id": 35,
+     "title": "Stop the Charge",
+     "brief": "Waves of fast shotguns will come for the control room. Hold it for six turns.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 6,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "rl"
+     ],
+     "enemy": [
+      "sg*2",
+      "mg"
+     ],
+     "turns": 6,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2295,
+     "player_place": "zone",
+     "enemy_place": "left",
+     "events": [
+      {
+       "turn": 2,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 4,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 36,
+     "title": "The Shape Portal",
+     "brief": "Reach the portal and hold it. The guards are heavily armed.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "gl",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2332,
+     "enemy_place": "zone"
+    }
+   ]
+  },
+  {
+   "title": "Brightmoor Finale",
+   "intro": "The cult is cornered, and so are you. End it before the building falls.",
+   "missions": [
+    {
+     "id": 37,
+     "title": "The Library",
+     "brief": "Narrow aisles and long sight lines. Snipers will punish you if you cross them.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn*2",
+      "sg"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2369,
+     "dark": true
+    },
+    {
+     "id": 38,
+     "title": "Disrupt the Form",
+     "brief": "Reach the machine and hold it. Three rocket launchers stand in your way, and a panel nearby can silence them.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "rl:launcher*3",
+      "mg*3",
+      "sg"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2406,
+     "enemy_place": "zone",
+     "panels": [
+      {
+       "at": "center",
+       "kill_tag": "launcher"
+      }
+     ]
+    },
+    {
+     "id": 39,
+     "title": "Fighting in the Square",
+     "brief": "An open square and a big fight. Use grenades, rockets and snipers to make them cross it.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "rl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn",
+      "rl",
+      "gl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 40,
+      "h": 22
+     },
+     "seed": 2443
+    }
+   ]
+  },
+  {
+   "title": "Termon Bank",
+   "intro": "The Splinter needs money. The Termon Bank holds the corporation's gold, and your hackers have a plan.",
+   "missions": [
+    {
+     "id": 40,
+     "title": "Hacking In",
+     "brief": "Reach the terminal room in the dark without raising the alarm.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2480,
+     "dark": true,
+     "enemy_place": "zone"
+    },
+    {
+     "id": 41,
+     "title": "Break the Vault",
+     "brief": "Reach the vault, but do not walk in a straight line, or a sniper will pick you off through the windows.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "sn",
+      "mg*3",
+      "sg"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2517,
+     "enemy_place": "zone"
+    },
+    {
+     "id": 42,
+     "title": "Cashing In",
+     "brief": "Take four crates of money out through the edge exits. Rockets will wreck the building around you.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 4
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg",
+      "sn",
+      "rl"
+     ],
+     "turns": 12,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2554,
+     "items": 5
+    }
+   ]
+  },
+  {
+   "title": "Open War",
+   "intro": "Enyo:Drift has stopped hiding. Squads clash in the open streets, and the Splinter has to hold.",
+   "missions": [
+    {
+     "id": 43,
+     "title": "Clemens Square",
+     "brief": "A big open fight. Keep your units together and let them come to you.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "rl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 40,
+      "h": 22
+     },
+     "seed": 2591
+    },
+    {
+     "id": 44,
+     "title": "Rapid Takedown",
+     "brief": "You have four turns. Move fast, strike hard, and do not stop.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "cm*3",
+      "sg*2"
+     ],
+     "enemy": [
+      "mg*4",
+      "sg"
+     ],
+     "turns": 4,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2628
+    },
+    {
+     "id": 45,
+     "title": "Protection",
+     "brief": "One long turn of fifty seconds. Hold the zone with three units while enemies come in pairs from three directions. Expect to retry.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 1,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "sg",
+      "mg",
+      "sn"
+     ],
+     "enemy": [],
+     "turns": 1,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2665,
+     "turn_seconds": 50,
+     "player_place": "zone",
+     "wave_from": "left",
+     "events": [
+      {
+       "turn": 1,
+       "tick": 40,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "shotgun"
+        }
+       ]
+      },
+      {
+       "turn": 1,
+       "tick": 160,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 1,
+       "tick": 280,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 1,
+       "tick": 400,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "shotgun"
+        }
+       ]
+      },
+      {
+       "turn": 1,
+       "tick": 520,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 1,
+       "tick": 640,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 1,
+       "tick": 760,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "shotgun"
+        }
+       ]
+      },
+      {
+       "turn": 1,
+       "tick": 880,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Finding Nox",
+   "intro": "Nox has vanished. The Splinter searches the city for him, and for the one who took him.",
+   "missions": [
+    {
+     "id": 46,
+     "title": "Save Belaqua",
+     "brief": "Belaqua, a defected form, is trapped. Get it out through an edge exit.",
+     "objectives": [
+      {
+       "type": "rescue",
+       "count": 1
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2702,
+     "rescue": [
+      "hos"
+     ],
+     "enemy_place": "center"
+    },
+    {
+     "id": 47,
+     "title": "Reaching",
+     "brief": "Push through to the marked zone without being seen.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn",
+      "sg*2",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2739,
+     "dark": true,
+     "enemy_place": "zone"
+    },
+    {
+     "id": 48,
+     "title": "The Escape",
+     "brief": "Get your wounded commander to the edge exit. Reinforcements are on their way.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "exit_right",
+       "hold": 2,
+       "tag": "vip"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg",
+      "sn",
+      "civ:vip"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2776,
+     "events": [
+      {
+       "turn": 3,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "shotgun"
+        }
+       ]
+      },
+      {
+       "turn": 5,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Glass Spire",
+   "intro": "Shane's headquarters rises over the city. You will go in from the plaza, and you will not come out the way you went in.",
+   "missions": [
+    {
+     "id": 49,
+     "title": "Incursion",
+     "brief": "Scout the lobby in the dark. They have the numbers, so use the walls.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2813,
+     "dark": true
+    },
+    {
+     "id": 50,
+     "title": "Courtyard",
+     "brief": "A courtyard battle. Use grenades and a rocket to break cover, and kill what runs.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn",
+      "gl",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 38,
+      "h": 22
+     },
+     "seed": 2850
+    },
+    {
+     "id": 51,
+     "title": "Access Control",
+     "brief": "Bring three access keys to an edge exit. The tower's guards are alert.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 3
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn",
+      "rl"
+     ],
+     "turns": 12,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2887,
+     "dark": true,
+     "items": 5
+    }
+   ]
+  },
+  {
+   "title": "Final Hour",
+   "intro": "The last stand: at the top of the Spire, the Splinter faces its own mistakes.",
+   "missions": [
+    {
+     "id": 52,
+     "title": "The Corridor",
+     "brief": "The Devastator has to reach the objective. Make sure it does not stand up until the nests are blown, and do not get it killed.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3,
+       "tag": "vip"
+      }
+     ],
+     "player": [
+      "dv:vip",
+      "mg*2",
+      "sg",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn*2",
+      "sg*2",
+      "rl*2"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2924,
+     "enemy_place": "zone",
+     "enemy_style": "defend"
+    },
+    {
+     "id": 53,
+     "title": "Ouroboros",
+     "brief": "Destroy the cover in the middle, then send a shotgun on a suicide run to touch the objective. Stray enemies fight on their own.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "sg*3",
+      "mg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*4",
+      "sn*2",
+      "sg*2",
+      "rl*2"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2961,
+     "enemy_place": "zone",
+     "enemy_style": "defend"
+    },
+    {
+     "id": 54,
+     "title": "The Reversal",
+     "brief": "Defend the stronghold against yourself. If you remember how you fought, six turns is plenty.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 6,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "sn",
+      "rl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*3",
+      "sn"
+     ],
+     "turns": 6,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 2998,
+     "player_place": "zone",
+     "enemy_place": "left",
+     "events": [
+      {
+       "turn": 2,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      },
+      {
+       "turn": 4,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "The Mandala",
+   "intro": "There is nothing left to shoot. Stop for a moment and listen.",
+   "missions": [
+    {
+     "id": 55,
+     "title": "Mandala",
+     "brief": "There is no enemy here. Stand still for one turn and listen to what Charon's Hand has to say.",
+     "objectives": [
+      {
+       "type": "survive",
+       "turns": 1
+      }
+     ],
+     "player": [
+      "mg"
+     ],
+     "enemy": [],
+     "turns": 1,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 3035
+    }
+   ]
+  }
+ ]
+}

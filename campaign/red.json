@@ -1,0 +1,423 @@
+{
+ "id": "red",
+ "title": "Red Pack",
+ "blurb": "Riot Shield and Upload missions in the style of the Red expansion.",
+ "chapters": [
+  {
+   "title": "Red Line",
+   "intro": "The Splinter has been issued riot shields. A bulletproof wall that cannot fire back is a new way to fight.",
+   "missions": [
+    {
+     "id": 1,
+     "title": "Shield Wall",
+     "brief": "Walk the shields forward and let a grenade launcher do the work behind them.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "rs*2",
+      "gl",
+      "mg"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1044
+    },
+    {
+     "id": 2,
+     "title": "Cover Fire",
+     "brief": "Escort a team across an open square with shields in front and guns behind.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "zone",
+       "hold": 3
+      }
+     ],
+     "player": [
+      "rs*2",
+      "mg",
+      "sg",
+      "gl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1081,
+     "enemy_place": "zone"
+    },
+    {
+     "id": 3,
+     "title": "Breakwater",
+     "brief": "Hold the line for six turns. Face the shields at the doors and stand still: a moving shield is no shield.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 6,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "rs*2",
+      "mg",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "sg*3",
+      "mg*2",
+      "rl"
+     ],
+     "turns": 6,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1118,
+     "player_place": "zone",
+     "enemy_place": "left",
+     "events": [
+      {
+       "turn": 3,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Upload Protocol",
+   "intro": "Each side carries a hacker whose death ends the operation. Protect yours; find theirs.",
+   "missions": [
+    {
+     "id": 4,
+     "title": "Handshake",
+     "brief": "A simple test. Keep your hacker alive and kill theirs.",
+     "objectives": [
+      {
+       "type": "kill_target"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg",
+      "rs",
+      "hk:vip"
+     ],
+     "enemy": [
+      "mg*2",
+      "sg",
+      "hk:target"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1155
+    },
+    {
+     "id": 5,
+     "title": "Packet Loss",
+     "brief": "In the dark, their hacker could be anywhere. Scout before you strike.",
+     "objectives": [
+      {
+       "type": "kill_target"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg",
+      "rs",
+      "hk:vip"
+     ],
+     "enemy": [
+      "mg*2",
+      "sg*2",
+      "hk:target"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1192,
+     "dark": true
+    },
+    {
+     "id": 6,
+     "title": "Root Access",
+     "brief": "Their hacker sits in a bunker behind rocket cover. Get close and finish it.",
+     "objectives": [
+      {
+       "type": "kill_target"
+      }
+     ],
+     "player": [
+      "mg*2",
+      "sg*2",
+      "rs",
+      "hk:vip"
+     ],
+     "enemy": [
+      "mg*3",
+      "sn",
+      "rl",
+      "hk:target"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1229,
+     "enemy_place": "zone",
+     "enemy_style": "defend"
+    }
+   ]
+  },
+  {
+   "title": "Red Rescue",
+   "intro": "Shields make good bodyguards. Use them to move people through danger.",
+   "missions": [
+    {
+     "id": 7,
+     "title": "Escort Duty",
+     "brief": "Lead two prisoners to the edge exit behind a pair of shields.",
+     "objectives": [
+      {
+       "type": "rescue",
+       "count": 2
+      }
+     ],
+     "player": [
+      "rs*2",
+      "mg",
+      "sg",
+      "sn"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1266,
+     "rescue": [
+      "hos*2"
+     ],
+     "enemy_place": "center"
+    },
+    {
+     "id": 8,
+     "title": "Crossfire Street",
+     "brief": "Carry three crates through a street with snipers on both sides.",
+     "objectives": [
+      {
+       "type": "collect",
+       "count": 3
+      }
+     ],
+     "player": [
+      "rs*2",
+      "mg",
+      "sg",
+      "gl"
+     ],
+     "enemy": [
+      "sn*2",
+      "mg*3",
+      "sg"
+     ],
+     "turns": 12,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1303,
+     "items": 4
+    },
+    {
+     "id": 9,
+     "title": "Glass House",
+     "brief": "In the dark, a house of glass walls and no cover. Use shields to move and guns to answer.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "rs*2",
+      "mg*2",
+      "sn",
+      "gl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn*2"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1340,
+     "dark": true
+    }
+   ]
+  },
+  {
+   "title": "Red Dawn",
+   "intro": "The last stand of the Red Line, in the open, at sunrise.",
+   "missions": [
+    {
+     "id": 10,
+     "title": "Siege",
+     "brief": "Three shields on a doorway and a sniper behind them. Hold for eight turns.",
+     "objectives": [
+      {
+       "type": "hold",
+       "turns": 8,
+       "zone": "zone"
+      }
+     ],
+     "player": [
+      "rs*3",
+      "sn",
+      "mg"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "rl"
+     ],
+     "turns": 8,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1377,
+     "player_place": "zone",
+     "enemy_place": "left",
+     "events": [
+      {
+       "turn": 3,
+       "spawn": [
+        {
+         "type": "shotgun"
+        },
+        {
+         "type": "shotgun"
+        }
+       ]
+      },
+      {
+       "turn": 5,
+       "spawn": [
+        {
+         "type": "mg"
+        },
+        {
+         "type": "mg"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "title": "Breakout",
+     "brief": "Take the commander to the edge. Shields in front, snipers behind.",
+     "objectives": [
+      {
+       "type": "reach",
+       "zone": "exit_right",
+       "hold": 2,
+       "tag": "vip"
+      }
+     ],
+     "player": [
+      "rs*2",
+      "mg",
+      "sn",
+      "gl",
+      "civ:vip"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn",
+      "rl"
+     ],
+     "turns": 10,
+     "map": {
+      "w": 32,
+      "h": 20
+     },
+     "seed": 1414,
+     "enemy_place": "scatter"
+    },
+    {
+     "id": 12,
+     "title": "Redline Final",
+     "brief": "Everything you have against everything they have. Ten units, one map, no second chances.",
+     "objectives": [
+      {
+       "type": "eliminate"
+      }
+     ],
+     "player": [
+      "rs*2",
+      "mg*2",
+      "sg*2",
+      "sn",
+      "rl",
+      "gl"
+     ],
+     "enemy": [
+      "mg*3",
+      "sg*2",
+      "sn*2",
+      "rl",
+      "gl",
+      "mg"
+     ],
+     "turns": 12,
+     "map": {
+      "w": 40,
+      "h": 22
+     },
+     "seed": 1451
+    }
+   ]
+  }
+ ]
+}

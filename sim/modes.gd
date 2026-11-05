@@ -7,6 +7,7 @@ extends RefCounted
 ## Scores are reported relative to team 0 (player 1), as in the original.
 
 const Fx = preload("res://sim/fx.gd")
+const MissionRules = preload("res://sim/mission.gd")
 
 const PICKUP_RADIUS := 800
 const SECURE_HOLD_TICKS := 60      # 3 s inside the zone
@@ -85,6 +86,8 @@ static func hostage_orderable(sim, u) -> bool:
 static func on_tick(sim) -> void:
 	var m: Dictionary = sim.mode
 	match m["type"]:
+		"mission":
+			MissionRules.on_tick(sim, m)
 		"secure":
 			_tick_secure(sim, m)
 		"disputed":
@@ -144,6 +147,8 @@ static func _tick_disputed(sim, m: Dictionary) -> void:
 		if b["delivered"] or b["lost"] or b["carrier"] >= 0:
 			continue
 		for u in sim.units:
+			if m.get("player_only", false) and u.team != 0:
+				continue
 			if u.alive and u.team < 2 and not carrying.has(u.id) and Fx.dist(u.x, u.y, b["x"], b["y"]) <= PICKUP_RADIUS:
 				b["carrier"] = u.id
 				carrying[u.id] = true
@@ -158,6 +163,8 @@ static func _tick_disputed(sim, m: Dictionary) -> void:
 			if in_rect(u.x, u.y, m["exits"][t]):
 				out = true
 		if not out:
+			continue
+		if m.get("carriers_only", false) and not carrying.has(u.id):
 			continue
 		for b in m["boxes"]:
 			if b["carrier"] == u.id:
@@ -202,6 +209,8 @@ static func _by_score(score0: int, reason: String) -> Dictionary:
 ## Evaluate the match at the end of turn number `turn` (1-based). winner: 0/1, or -1 for a draw.
 static func result(sim, turn: int) -> Dictionary:
 	var m: Dictionary = sim.mode
+	if m["type"] == "mission":
+		return MissionRules.result(sim, turn)
 	var a0: int = sim.alive_count(0)
 	var a1: int = sim.alive_count(1)
 	var att: int = m["attacker"]
