@@ -41,6 +41,7 @@ var _rmap = null
 var _base_tiles := PackedByteArray()
 
 var rframes: Array = []
+var death_ticks := {}   # unit id -> tick of death during the replayed turn
 var revents: Array = []
 var rt := 0.0
 var rspeed := 1.0
@@ -89,6 +90,10 @@ func begin_plan(team: int) -> void:
 func start_replay(frames: Array, events: Array, map_before, team: int, is_test: bool, show_all: bool) -> void:
 	rframes = frames
 	revents = events
+	death_ticks = {}
+	for e in events:
+		if e["type"] == "kill":
+			death_ticks[e["victim"]] = e["tick"]
 	_base_tiles = map_before.t.duplicate()
 	_rmap = map_before.duplicate_map()
 	rt = 0.0

@@ -12,7 +12,7 @@ const H_WALL := 1.0
 const H_LOW := 0.42
 
 const TEAM_COL := [Color("3dff8f"), Color("ff3d4d"), Color("ffd23a")]
-const ORDER_COL := Color(0.45, 1.0, 0.72, 0.92)
+const ORDER_COL := Color(0.22, 1.0, 0.4, 1.0)
 const TEST_COL := Color(1.0, 0.4, 0.5, 0.6)
 const WALL_TOP := Color("1c58e0")
 const WALL_TOP_EDGE := Color("a6dcff")
@@ -260,101 +260,214 @@ static func _objectives(b, c, f: int) -> void:
 
 # ------------------------------------------------------------------ figures
 
-static func _figure(c, pos: Vector2, ang: float, r: float, col: Color, type: String, ducked: bool, alpha: float, ghost: bool) -> void:
+static func _capsule(c, a: Vector2, b: Vector2, w: float, col: Color) -> void:
+	c.draw_line(a, b, col, w)
+	c.draw_circle(a, w * 0.5, col)
+	c.draw_circle(b, w * 0.5, col)
+
+## Humanoid, seen from above, facing +x (after the transform). k = size scale.
+static func _figure(c, pos: Vector2, ang: float, r: float, col: Color, type: String, ducked: bool, alpha: float, ghost: bool, moving: bool = false, phase: float = 0.0) -> void:
 	c.draw_set_transform(pos, ang, Vector2.ONE)
-	var lit := col
-	lit.a = alpha
-	var dark := col.darkened(0.62)
-	dark.a = alpha
-	var s := 0.78 if ducked else 1.0
+	var k: float = r
 	if type == "devastator":
-		s *= 1.3
-	var body: PackedVector2Array = _ellipse(Vector2(-0.05 * r, 0), 0.62 * r * s, 1.0 * r * s, 14)
+		k *= 1.3
+	var bright := col
+	bright.a = alpha
+	var mid := col.darkened(0.1)
+	mid.a = alpha
+	var dark := col.darkened(0.72)
+	dark.a = alpha
+	var lite := col.lightened(0.55)
+	lite.a = alpha
+	var sq: float = 0.8 if ducked else 1.0
 	if ghost:
-		var ring := body.duplicate()
-		ring.append(body[0])
-		c.draw_polyline(ring, lit, 1.4)
+		var ring := _ellipse(Vector2.ZERO, 0.6 * k, 1.0 * k, 16)
+		ring.append(ring[0])
+		c.draw_polyline(ring, bright, 1.5)
 		c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		return
-	c.draw_colored_polygon(body, dark)
-	var outline := body.duplicate()
-	outline.append(body[0])
-	c.draw_polyline(outline, lit, 1.6)
-	c.draw_circle(Vector2(0.12 * r, 0), 0.42 * r * s, lit)
-	var k: float = r * s
+	# soft shadow
+	c.draw_colored_polygon(_ellipse(Vector2(-0.05 * k, 0.12 * k), 0.85 * k, 1.1 * k, 16), Color(0, 0, 0, 0.38 * alpha))
+	# legs trail behind the torso, striding while moving, short and wide when ducked
+	var swing: float = sin(phase * 9.0) * 0.5 * k if moving else 0.0
+	var spread_y: float = 0.36 * k * (1.35 if ducked else 1.0)
+	var reach: float = 1.55 * k * (0.62 if ducked else 1.0)
+	for side in [-1.0, 1.0]:
+		var hip := Vector2(-0.3 * k, side * 0.28 * k)
+		var knee := Vector2(-0.3 * k - reach * 0.5 + swing * side, side * spread_y * 1.15)
+		var foot := Vector2(-0.3 * k - reach + swing * side * 1.4, side * spread_y)
+		_capsule(c, hip, knee, 0.56 * k, dark)
+		_capsule(c, knee, foot, 0.48 * k, dark)
+		c.draw_line(hip, knee, mid, 0.34 * k)
+		c.draw_line(knee, foot, mid, 0.28 * k)
+		c.draw_circle(foot, 0.22 * k, lite)
+	# torso: angular low-poly shoulders, back plate, chest highlight, bright rim
+	var T := PackedVector2Array([
+		Vector2(0.32 * k * sq, -0.55 * k), Vector2(0.1 * k, -0.82 * k), Vector2(-0.25 * k, -0.74 * k), Vector2(-0.5 * k * sq, -0.4 * k),
+		Vector2(-0.5 * k * sq, 0.4 * k), Vector2(-0.25 * k, 0.74 * k), Vector2(0.1 * k, 0.82 * k), Vector2(0.32 * k * sq, 0.55 * k)])
+	c.draw_colored_polygon(T, mid)
+	c.draw_colored_polygon(PackedVector2Array([Vector2(-0.5 * k * sq, -0.4 * k), Vector2(-0.25 * k, -0.74 * k), Vector2(-0.15 * k, -0.4 * k), Vector2(-0.15 * k, 0.4 * k), Vector2(-0.25 * k, 0.74 * k), Vector2(-0.5 * k * sq, 0.4 * k)]), dark)
+	c.draw_colored_polygon(PackedVector2Array([Vector2(0.26 * k * sq, -0.42 * k), Vector2(0.06 * k, -0.64 * k), Vector2(0.06 * k, 0.64 * k), Vector2(0.26 * k * sq, 0.42 * k)]), Color(lite.r, lite.g, lite.b, 0.45 * alpha))
+	var outline := T.duplicate()
+	outline.append(T[0])
+	c.draw_polyline(outline, lite, 1.4)
+	# arms to the grip, then the weapon
+	var hand_a := Vector2(1.0 * k, 0.3 * k)
+	var hand_b := Vector2(0.6 * k, 0.1 * k)
+	var civilian: bool = type == "hostage" or type == "civilian"
+	if civilian:
+		hand_a = Vector2(0.9 * k, 0.75 * k)
+		hand_b = Vector2(0.9 * k, -0.75 * k)
+	if type == "rocket" or type == "devastator":
+		hand_a = Vector2(0.5 * k, 0.6 * k)
+		hand_b = Vector2(0.1 * k, 0.55 * k)
+	var sh_a := Vector2(0.0, 0.78 * k)
+	var sh_b := Vector2(0.0, -0.78 * k)
+	var el_a := Vector2(0.42 * k, 1.0 * k) if not civilian else Vector2(0.5 * k, 0.95 * k)
+	var el_b := Vector2(0.4 * k, -0.85 * k) if not civilian else Vector2(0.5 * k, -0.95 * k)
+	if type == "rocket" or type == "devastator":
+		el_a = Vector2(0.3 * k, 0.95 * k)
+		el_b = Vector2(0.05 * k, 0.8 * k)
+	for pair in [[sh_a, el_a, hand_a], [sh_b, el_b, hand_b]]:
+		_capsule(c, pair[0], pair[1], 0.48 * k, dark)
+		_capsule(c, pair[1], pair[2], 0.42 * k, dark)
+		c.draw_line(pair[0], pair[1], mid, 0.3 * k)
+		c.draw_line(pair[1], pair[2], mid, 0.25 * k)
+		c.draw_circle(pair[2], 0.19 * k, lite)
 	match type:
 		"mg":
-			c.draw_line(Vector2(0.35 * k, 0.55 * k), Vector2(1.75 * k, 0.55 * k), lit, maxf(0.2 * k, 2.0))
-			c.draw_rect(Rect2(Vector2(0.15 * k, 0.4 * k), Vector2(0.55 * k, 0.32 * k)), lit)
+			c.draw_line(Vector2(0.35 * k, 0.32 * k), Vector2(1.95 * k, 0.32 * k), bright, maxf(0.22 * k, 2.0))
+			c.draw_rect(Rect2(Vector2(0.55 * k, 0.32 * k), Vector2(0.38 * k, 0.4 * k)), bright)
+			c.draw_rect(Rect2(Vector2(0.2 * k, 0.2 * k), Vector2(0.4 * k, 0.26 * k)), mid)
 		"shotgun":
-			c.draw_line(Vector2(0.3 * k, 0.55 * k), Vector2(1.4 * k, 0.55 * k), lit, maxf(0.34 * k, 3.0))
+			c.draw_line(Vector2(0.35 * k, 0.32 * k), Vector2(1.55 * k, 0.32 * k), bright, maxf(0.34 * k, 3.0))
+			c.draw_line(Vector2(0.9 * k, 0.32 * k), Vector2(1.3 * k, 0.32 * k), lite, maxf(0.14 * k, 1.5))
 		"commando":
-			c.draw_line(Vector2(0.3 * k, 0.4 * k), Vector2(1.5 * k, 0.4 * k), lit, maxf(0.24 * k, 2.5))
-			c.draw_line(Vector2(0.3 * k, 0.75 * k), Vector2(1.5 * k, 0.75 * k), lit, maxf(0.24 * k, 2.5))
+			c.draw_line(Vector2(0.35 * k, 0.15 * k), Vector2(1.6 * k, 0.15 * k), bright, maxf(0.22 * k, 2.2))
+			c.draw_line(Vector2(0.35 * k, 0.5 * k), Vector2(1.6 * k, 0.5 * k), bright, maxf(0.22 * k, 2.2))
 		"sniper":
-			c.draw_line(Vector2(0.1 * k, 0.55 * k), Vector2(2.4 * k, 0.55 * k), lit, maxf(0.14 * k, 1.6))
-			c.draw_rect(Rect2(Vector2(0.8 * k, 0.28 * k), Vector2(0.5 * k, 0.2 * k)), lit)
+			c.draw_line(Vector2(0.1 * k, 0.32 * k), Vector2(2.7 * k, 0.32 * k), bright, maxf(0.14 * k, 1.6))
+			c.draw_rect(Rect2(Vector2(0.9 * k, 0.05 * k), Vector2(0.55 * k, 0.2 * k)), lite)
+			c.draw_line(Vector2(0.4 * k, 0.32 * k), Vector2(0.4 * k, 0.8 * k), bright, maxf(0.1 * k, 1.4))
 		"rocket":
-			c.draw_line(Vector2(-0.7 * k, -0.7 * k), Vector2(1.2 * k, -0.7 * k), lit, maxf(0.5 * k, 4.0))
-			c.draw_colored_polygon(PackedVector2Array([Vector2(1.2 * k, -1.0 * k), Vector2(1.7 * k, -0.7 * k), Vector2(1.2 * k, -0.4 * k)]), lit)
+			c.draw_line(Vector2(-0.7 * k, 0.6 * k), Vector2(1.35 * k, 0.6 * k), bright, maxf(0.52 * k, 4.0))
+			c.draw_line(Vector2(-0.7 * k, 0.6 * k), Vector2(-0.4 * k, 0.6 * k), lite, maxf(0.52 * k, 4.0))
+			c.draw_colored_polygon(PackedVector2Array([Vector2(1.35 * k, 0.28 * k), Vector2(1.9 * k, 0.6 * k), Vector2(1.35 * k, 0.92 * k)]), bright)
 		"devastator":
-			c.draw_line(Vector2(-0.5 * k, -0.7 * k), Vector2(1.4 * k, -0.7 * k), lit, maxf(0.34 * k, 3.5))
-			c.draw_line(Vector2(-0.5 * k, 0.7 * k), Vector2(1.4 * k, 0.7 * k), lit, maxf(0.34 * k, 3.5))
+			c.draw_line(Vector2(-0.5 * k, 0.75 * k), Vector2(1.5 * k, 0.75 * k), bright, maxf(0.36 * k, 3.5))
+			c.draw_line(Vector2(-0.5 * k, -0.75 * k), Vector2(1.5 * k, -0.75 * k), bright, maxf(0.36 * k, 3.5))
 		"grenade":
-			c.draw_line(Vector2(0.3 * k, 0.55 * k), Vector2(1.05 * k, 0.55 * k), lit, maxf(0.5 * k, 4.0))
-			c.draw_circle(Vector2(1.25 * k, 0.55 * k), 0.3 * k, lit)
+			c.draw_line(Vector2(0.3 * k, 0.32 * k), Vector2(1.2 * k, 0.32 * k), bright, maxf(0.5 * k, 4.0))
+			c.draw_circle(Vector2(1.45 * k, 0.32 * k), 0.32 * k, lite)
 		"riot":
 			var arc := PackedVector2Array()
-			for i in range(13):
-				var a: float = deg_to_rad(-70.0 + 140.0 * float(i) / 12.0)
-				arc.append(Vector2(cos(a), sin(a)) * 1.25 * k)
-			c.draw_polyline(arc, lit, maxf(0.34 * k, 3.5))
+			for i in range(15):
+				var a: float = deg_to_rad(-75.0 + 150.0 * float(i) / 14.0)
+				arc.append(Vector2(cos(a), sin(a)) * 1.35 * k)
+			c.draw_polyline(arc, bright, maxf(0.4 * k, 3.5))
+			c.draw_polyline(arc, lite, maxf(0.12 * k, 1.5))
 		"hacker":
-			c.draw_rect(Rect2(Vector2(0.5 * k, -0.25 * k), Vector2(0.6 * k, 0.5 * k)), lit, false, 1.6)
-			c.draw_rect(Rect2(Vector2(0.62 * k, -0.15 * k), Vector2(0.36 * k, 0.3 * k)), lit)
+			c.draw_rect(Rect2(Vector2(0.6 * k, -0.28 * k), Vector2(0.7 * k, 0.56 * k)), bright, false, 1.8)
+			c.draw_rect(Rect2(Vector2(0.72 * k, -0.17 * k), Vector2(0.46 * k, 0.34 * k)), lite)
 		_:
-			c.draw_line(Vector2(0.2 * k, -0.8 * k), Vector2(0.9 * k, -0.5 * k), lit, 1.6)
-			c.draw_line(Vector2(0.2 * k, 0.8 * k), Vector2(0.9 * k, 0.5 * k), lit, 1.6)
+			pass
+	# head: helmet with dark rim, bright crown and visor slit
+	var hc := Vector2(0.14 * k - (0.08 * k if ducked else 0.0), 0)
+	c.draw_circle(hc, 0.4 * k * sq, dark)
+	c.draw_circle(hc, 0.34 * k * sq, mid)
+	c.draw_circle(hc + Vector2(-0.06 * k, 0), 0.22 * k * sq, lite)
+	c.draw_arc(hc, 0.34 * k * sq, deg_to_rad(-60.0), deg_to_rad(60.0), 8, dark, maxf(0.14 * k, 1.8))
+	c.draw_arc(hc, 0.4 * k * sq, 0, TAU, 20, lite, 1.0)
 	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+## What a dead unit leaves behind: a faint crumpled body under a splatter in its team colour.
+static func _splat(c, pos: Vector2, ang: float, r: float, col: Color, type: String, seed_v: int, spread: float, alpha: float) -> void:
+	_figure(c, pos, ang, r * 0.9, col.darkened(0.35), type, true, 0.3 * alpha, false)
+	var base := col
+	base.a = 0.75 * alpha
+	var pool := col.darkened(0.2)
+	pool.a = 0.5 * alpha
+	c.draw_colored_polygon(_ellipse(pos, r * 1.5 * spread, r * 1.2 * spread, 16), pool)
+	for i in range(40):
+		var h: int = (seed_v * 131 + i * 7919) % 1000
+		var a: float = TAU * float((h * 7) % 360) / 360.0
+		var d: float = r * (0.1 + float((h * 13) % 100) / 100.0 * 2.1) * spread
+		var rr: float = r * (0.08 + float((h * 29) % 100) / 100.0 * 0.3) * (0.4 + 0.6 * spread)
+		c.draw_circle(pos + Vector2(cos(a), sin(a)) * d, rr, base)
+	for i in range(8):
+		var h2: int = (seed_v * 97 + i * 6007) % 1000
+		var a2: float = ang + PI + (float(h2 % 100) - 50.0) / 80.0
+		var d2: float = r * (1.2 + float((h2 * 3) % 100) / 100.0 * 1.4) * spread
+		c.draw_line(pos + Vector2(cos(a2), sin(a2)) * r * 0.4 * spread, pos + Vector2(cos(a2), sin(a2)) * d2, base, maxf(r * 0.1, 1.5))
 
 static func _facing_rad(facing: int) -> float:
 	return float(facing) / 10.0 * PI / 180.0
 
-static func _unit_figure(b, c, pos: Vector2, u_team: int, type: String, facing: int, ducked: bool, alpha: float = 1.0, ghost: bool = false) -> void:
-	_figure(c, pos, _facing_rad(facing), b.ts * 0.5, TEAM_COL[u_team], type, ducked, alpha, ghost)
+static func _unit_figure(b, c, pos: Vector2, u_team: int, type: String, facing: int, ducked: bool, alpha: float = 1.0, ghost: bool = false, moving: bool = false, phase: float = 0.0) -> void:
+	_figure(c, pos, _facing_rad(facing), b.ts * 0.78, TEAM_COL[u_team], type, ducked, alpha, ghost, moving, phase)
 
-static func _orders(b, c, id: int, o: Dictionary, col: Color, off: float) -> void:
+static func _cross(c, p: Vector2, r: float, col: Color) -> void:
+	c.draw_arc(p, r, 0, TAU, 20, col, 1.6)
+	c.draw_line(p + Vector2(-r * 1.5, 0), p + Vector2(-r * 0.5, 0), col, 1.6)
+	c.draw_line(p + Vector2(r * 0.5, 0), p + Vector2(r * 1.5, 0), col, 1.6)
+	c.draw_line(p + Vector2(0, -r * 1.5), p + Vector2(0, -r * 0.5), col, 1.6)
+	c.draw_line(p + Vector2(0, r * 0.5), p + Vector2(0, r * 1.5), col, 1.6)
+
+## Small pictogram: crouching (ducked) or upright figure.
+static func _stance_icon(c, p: Vector2, ducked: bool, col: Color) -> void:
+	c.draw_circle(p + Vector2(0, -6), 2.6, col)
+	if ducked:
+		c.draw_line(p + Vector2(0, -3), p + Vector2(3, 3), col, 2.0)
+		c.draw_line(p + Vector2(3, 3), p + Vector2(-3, 7), col, 2.0)
+		c.draw_line(p + Vector2(3, 3), p + Vector2(8, 7), col, 2.0)
+	else:
+		c.draw_line(p + Vector2(0, -3), p + Vector2(0, 4), col, 2.0)
+		c.draw_line(p + Vector2(0, 4), p + Vector2(-3, 9), col, 2.0)
+		c.draw_line(p + Vector2(0, 4), p + Vector2(3, 9), col, 2.0)
+		c.draw_line(p + Vector2(-4, -1), p + Vector2(4, -1), col, 2.0)
+
+static func _orders(b, c, id: int, o: Dictionary, col: Color, off: float, test: bool = false) -> void:
 	var u = b._unit(id)
 	var prev: Vector2 = b._p(u.x, u.y)
+	var line_col := Color(1, 1, 1, 0.55 if test else 0.92)
+	var node_col := col
+	node_col.a = 1.0 if not test else 0.65
+	var sqs: float = b.ts * 0.26
+	var aim_col := Color(0.85, 0.95, 1.0, 0.55)
 	for wp in o.get("path", []):
 		var q: Vector2 = b._p(wp["x"], wp["y"])
-		_dash(c, prev, q, col, 2.0, 4.0, 5.0, off)
-		c.draw_circle(q, 3.2, col)
+		c.draw_line(prev, q, line_col, 2.6)
+		c.draw_rect(Rect2(q - Vector2(sqs, sqs) * 0.5, Vector2(sqs, sqs)), node_col)
 		if wp["wait"] > 0:
-			_text(c, q + Vector2(6, -6), "%ds" % wp["wait"], col, 12)
+			_text(c, q + Vector2(8, -8), "%ds" % wp["wait"], line_col, 12)
 		if wp["duck"] != u.ducked or wp["duck"]:
-			c.draw_arc(q, 7.0, 0, TAU, 14, col, 1.2)
+			_stance_icon(c, q + Vector2(-12, 14), wp["duck"], line_col)
 		if wp["aim_x"] >= 0:
-			_dash(c, q, b._p(wp["aim_x"], wp["aim_y"]), Color(0.9, 0.95, 1.0, 0.55), 1.0, 3.0, 6.0, off)
+			var ap: Vector2 = b._p(wp["aim_x"], wp["aim_y"])
+			_dash(c, q, ap, aim_col, 1.2, 5.0, 6.0, off)
+			_cross(c, ap, 5.0, Color(1, 1, 1, 0.85))
 		prev = q
 	if o.has("aim"):
-		_dash(c, b._p(u.x, u.y), b._p(o["aim"]["x"], o["aim"]["y"]), Color(0.9, 0.95, 1.0, 0.55), 1.0, 3.0, 6.0, off)
+		var ap2: Vector2 = b._p(o["aim"]["x"], o["aim"]["y"])
+		_dash(c, b._p(u.x, u.y), ap2, aim_col, 1.2, 5.0, 6.0, off)
+		_cross(c, ap2, 5.0, Color(1, 1, 1, 0.85))
 	if o.has("fire"):
 		var fp: Vector2 = b._p(o["fire"]["x"], o["fire"]["y"])
 		var rad: float = Balance.EXPLOSIVES[Balance.TYPES[u.type]["kind"]]["radius"] / 1000.0 * b.ts
-		var oc := Color(1.0, 0.62, 0.2, 0.9)
-		c.draw_arc(fp, rad, 0, TAU, 40, Color(1.0, 0.62, 0.2, 0.55), 1.4)
-		c.draw_line(fp - Vector2(8, 0), fp + Vector2(8, 0), oc, 2.0)
-		c.draw_line(fp - Vector2(0, 8), fp + Vector2(0, 8), oc, 2.0)
-		_dash(c, b._p(u.x, u.y), fp, Color(1.0, 0.62, 0.2, 0.5), 1.2, 4.0, 6.0, off)
+		var oc := Color(1.0, 0.62, 0.2, 0.95)
+		c.draw_arc(fp, rad, 0, TAU, 40, Color(1.0, 0.62, 0.2, 0.5), 1.4)
+		_cross(c, fp, 6.0, oc)
+		_dash(c, b._p(u.x, u.y), fp, Color(1.0, 0.62, 0.2, 0.55), 1.4, 5.0, 6.0, off)
+	if o.has("duck") and o["path"].is_empty():
+		_stance_icon(c, b._p(u.x, u.y) + Vector2(-b.ts * 0.9, b.ts * 0.6), o["duck"], line_col)
 	if o.get("cos", false):
-		_text(c, b._p(u.x, u.y) + Vector2(-8, -b.ts * 0.7), "COS", Color(1, 0.95, 0.5), 11)
+		_text(c, b._p(u.x, u.y) + Vector2(-10, -b.ts * 0.95), "HOLD FIRE", Color(1, 0.95, 0.5), 11)
 	for eid in o.get("ignore", []):
 		var e = b._unit(eid)
 		if e != null:
 			var q2: Vector2 = b._p(e.x, e.y)
-			c.draw_line(q2 - Vector2(6, 6), q2 + Vector2(6, 6), Color(1, 1, 0.3), 2.0)
-			c.draw_line(q2 - Vector2(6, -6), q2 + Vector2(6, -6), Color(1, 1, 0.3), 2.0)
+			c.draw_line(q2 - Vector2(7, 7), q2 + Vector2(7, 7), Color(1, 1, 0.3), 2.0)
+			c.draw_line(q2 - Vector2(7, -7), q2 + Vector2(7, -7), Color(1, 1, 0.3), 2.0)
 
 static func _plan_layer(b, c, m) -> void:
 	var game = b.game
@@ -362,7 +475,7 @@ static func _plan_layer(b, c, m) -> void:
 		c.draw_texture_rect(b.fog_tex, Rect2(b.origin, Vector2(m.w, m.h) * b.ts), false)
 	var off: float = Time.get_ticks_msec() * 0.012
 	for id in b.test_orders.keys():
-		_orders(b, c, id, b.test_orders[id], TEST_COL, off)
+		_orders(b, c, id, b.test_orders[id], TEST_COL, off, true)
 	for id2 in b.orders.keys():
 		if b._unit(id2) != null and b._unit(id2).alive:
 			_orders(b, c, id2, b.orders[id2], ORDER_COL, off)
@@ -371,7 +484,7 @@ static func _plan_layer(b, c, m) -> void:
 		if not u.alive:
 			if u.extracted:
 				continue
-			_unit_figure(b, c, b._p(u.x, u.y), u.team, u.type, u.facing, true, 0.22)
+			_splat(c, b._p(u.x, u.y), _facing_rad(u.facing), b.ts * 0.78, TEAM_COL[u.team], u.type, u.id, 1.0, 1.0)
 			continue
 		if u.team == b.view_team:
 			_unit_figure(b, c, b._p(u.x, u.y), u.team, u.type, u.facing, u.ducked)
@@ -396,10 +509,13 @@ static func _replay_units(b, c, st: Dictionary) -> void:
 		if u.team != b.rview and game.dark and not b.rshow_all and not seen.has(a[0]):
 			continue
 		if not a[4]:
-			_unit_figure(b, c, b._p(a[1], a[2]), u.team, u.type, a[3], true, 0.22)
+			var dt: int = b.death_ticks.get(a[0], -100)
+			var spread: float = clampf(float(f - dt) / 6.0, 0.0, 1.0)
+			_splat(c, b._p(a[1], a[2]), _facing_rad(a[3]), b.ts * 0.78, TEAM_COL[u.team], u.type, a[0], spread, 1.0)
 			continue
 		var pos: Vector2 = b._p(lerpf(a[1], nb[1], fa), lerpf(a[2], nb[2], fa))
-		_unit_figure(b, c, pos, u.team, u.type, a[3], bool(a[5]))
+		var moving: bool = absi(nb[1] - a[1]) + absi(nb[2] - a[2]) > 20
+		_unit_figure(b, c, pos, u.team, u.type, a[3], bool(a[5]), 1.0, false, moving, b.rt + float(a[0]) * 0.37)
 
 # ------------------------------------------------------------------ additive glow layer
 
@@ -416,6 +532,20 @@ static func draw_glow(b, c) -> void:
 	var cx: float = b.origin.x + m.w * b.ts * 0.5
 	var cy: float = b.origin.y + m.h * b.ts * 0.5
 	_glow_blob(c, Vector2(cx, cy), maxf(m.w, m.h) * b.ts * 0.55, Color(0.1, 0.28, 0.9, 0.10))
+	# drifting blue debris cubes (atmosphere)
+	var dseed: int = m.w * 31 + m.h * 17
+	for i in range(46):
+		var h1: int = (dseed + i * 7919) % 1000
+		var h2: int = (dseed * 3 + i * 104729) % 1000
+		var dp := Vector2(b.origin.x + float(h1) / 1000.0 * m.w * b.ts, b.origin.y + float(h2) / 1000.0 * m.h * b.ts)
+		dp += Vector2(sin(Time.get_ticks_msec() * 0.0004 + i), cos(Time.get_ticks_msec() * 0.0003 + i * 2.0)) * 4.0
+		var sz: float = 3.0 + float((h1 * h2) % 6)
+		var da: float = float(h1 % 90) * 0.0175
+		var pts := PackedVector2Array()
+		for q in range(4):
+			var qa: float = da + q * PI * 0.5
+			pts.append(dp + Vector2(cos(qa), sin(qa)) * sz)
+		c.draw_colored_polygon(pts, Color(0.3, 0.55, 1.0, 0.18))
 	# glowing wall-top edges
 	var ctr: Vector2 = b.size * 0.5
 	for e in _sorted_blocks(b, cur, m):
@@ -448,8 +578,8 @@ static func draw_glow(b, c) -> void:
 				continue
 			if u.team == b.view_team or visible_ids.has(u.id):
 				var col: Color = TEAM_COL[u.team]
-				col.a = 0.3
-				_glow_blob(c, b._p(u.x, u.y), b.ts * 1.0, col)
+				col.a = 0.13
+				_glow_blob(c, b._p(u.x, u.y), b.ts * 1.1, col)
 		if b.selected >= 0 and b._unit(b.selected) != null and b._unit(b.selected).alive:
 			var su = b._unit(b.selected)
 			var pulse: float = 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.006)
@@ -489,8 +619,8 @@ static func _glow_replay_units(b, c, st: Dictionary) -> void:
 		var nb: Array = b._frame_unit(nxt, a[0])
 		var pos: Vector2 = b._p(lerpf(a[1], nb[1], fa), lerpf(a[2], nb[2], fa))
 		var col: Color = TEAM_COL[u.team]
-		col.a = 0.3
-		_glow_blob(c, pos, b.ts * 1.0, col)
+		col.a = 0.13
+		_glow_blob(c, pos, b.ts * 1.1, col)
 	var dashoff: float = b.rt * 70.0
 	for pr in fr["p"]:
 		var pp: Vector2 = b._p(pr[1], pr[2])
@@ -515,7 +645,12 @@ static func _glow_replay_units(b, c, st: Dictionary) -> void:
 						else:
 							c.draw_line(a0, a1, Color(0.7, 0.85, 1.0, 0.08), 5.0)
 							_dash(c, a0, a1, Color(0.9, 0.95, 1.0, 0.7), 1.4, 6.0, 6.0, dashoff)
-						_glow_blob(c, a0, b.ts * 0.8, Color(1.0, 0.95, 0.7, 0.5))
+						var dir: Vector2 = (a1 - a0).normalized()
+						var muzzle: Vector2 = a0 + dir * b.ts * 1.1
+						_glow_blob(c, muzzle, b.ts * 0.9, Color(1.0, 0.95, 0.7, 0.8))
+						for si in range(6):
+							var sa: float = dir.angle() + (float(si) - 2.5) * 0.35
+							c.draw_line(muzzle, muzzle + Vector2(cos(sa), sin(sa)) * b.ts * 0.7, Color(1, 1, 0.9, 0.85), 1.4)
 			"explosion":
 				if age <= 26:
 					_explosion(b, c, e, age)
