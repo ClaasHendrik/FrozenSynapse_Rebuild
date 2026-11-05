@@ -40,7 +40,31 @@ static func create(mode: String, seed_value: int, is_dark: bool = false, opts: D
 		for i in range(mini(types.size(), spots.size())):
 			mt.sim.add_unit(team, types[i], spots[i][0], spots[i][1], 0 if team == 0 else 1800)
 	Modes.setup(mt.sim, mode, mt.layout, opts)
+	mt._update_seen()
 	return mt
+
+func _update_seen() -> void:
+	for t in range(2):
+		for id in sim.visible_to_team(t):
+			var e = sim.unit(id)
+			last_seen[t][id] = [e.x, e.y]
+
+## Copy of the sim as the given team may know it. In Dark mode enemies it cannot see are
+## moved to their last-known position, or removed if never seen (used by Test preview and the AI).
+func fog_clone(team: int):
+	var c = sim.clone()
+	if not dark:
+		return c
+	var vis: Array = sim.visible_to_team(team)
+	for u in c.units:
+		if u.team == team or vis.has(u.id):
+			continue
+		if last_seen[team].has(u.id):
+			u.x = last_seen[team][u.id][0]
+			u.y = last_seen[team][u.id][1]
+		else:
+			u.alive = false
+	return c
 
 ## orders: {unit_id: order dict}. Returns the ids that were rejected.
 func submit_orders(team: int, orders: Dictionary) -> Array:
@@ -67,10 +91,7 @@ func play_turn(pending: Dictionary = {}) -> Dictionary:
 			sim.set_orders(u.id, {})
 	sim.run_turn()
 	turn += 1
-	for t in range(2):
-		for id in sim.visible_to_team(t):
-			var e = sim.unit(id)
-			last_seen[t][id] = [e.x, e.y]
+	_update_seen()
 	var r: Dictionary = Modes.result(sim, turn)
 	over = r["over"]
 	winner = r["winner"]

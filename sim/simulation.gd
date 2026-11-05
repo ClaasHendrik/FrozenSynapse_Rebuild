@@ -347,7 +347,11 @@ func _snapshot() -> void:
 	var ps: Array = []
 	for p in projectiles:
 		ps.append([p["kind"], p["x"], p["y"], p["landed"]])
-	frames.append({"u": us, "p": ps})
+	var bs: Array = []
+	if not mode.is_empty() and mode["type"] == "disputed":
+		for b in mode["boxes"]:
+			bs.append([b["x"], b["y"], b["delivered"]])
+	frames.append({"u": us, "p": ps, "b": bs})
 
 func to_dict() -> Dictionary:
 	var us: Array = []
