@@ -49,3 +49,6 @@ packaging/build_appimage.sh /path/to/Godot_v4.3-stable_linux.x86_64 /path/to/app
 ```
 The Godot binary is the runtime for the game's `.pck`. Saves and campaign progress go to `~/.local/share/godot/app_userdata/Cold Synapse/`.
 Windows and macOS exports use Godot export templates (macOS also needs signing/notarisation); not done yet.
+
+## Parked: the next game
+See `docs/FUTURE_GAME_NOTES.md` and `docs/NEW_GAME_DESIGN.md`. **Remind the owner of this once Cold Synapse is done.**

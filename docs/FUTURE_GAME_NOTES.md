@@ -43,3 +43,14 @@ logic of the storyline.
   as dark as possible, always respecting life, showing enemies as human beings and resisting propaganda.
 * Neutral writing: both sides have equal chances and, absent a decisive imbalance, end in the same situation. The theme is
   the cost of human hubris and inhuman decisions, idealistically, not propaganda for either side.
+
+## Further answers
+* Map style by size: FS-like squares for small maps; Grigsby-style hexes for large maps; in between to be worked out
+  (suggestion: hexes that can be opened into a few sub-cells).
+* Drill-down from the operational map into the close FS-style tactical view: yes, include it in the first version.
+* The new game is PARKED until the Frozen Synapse remake (Cold Synapse) is finished.
+
+## REMINDER FOR THE ASSISTANT (owner's explicit request)
+**When the Cold Synapse remake is declared done, remind the owner of this project** (docs/NEW_GAME_DESIGN.md,
+draft 2, working title "Thin Ice") and offer to start with roadmap step 1 (one Berlin spy mission at the new scale).
+Open points to raise then: title, how historical, how remote assets are secured in Act I, hex/square handover.

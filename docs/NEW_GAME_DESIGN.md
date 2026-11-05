@@ -165,15 +165,15 @@ The Frozen Synapse style (a close, extruded, glowing grid with individual figure
 * **Global map from the beginning,** with every location reachable, to allow securing units and assets in remote corners early.
 * **Branches** change in varying degrees after each mission and each between-mission decision.
 * **Tone:** realistically dark. The results of war are never joked about; dealing with them is fine. Humour everywhere else, as dark as it gets, always respecting life and the humanity of enemies, and resisting propaganda.
+* **Map style by size:** FS-like squares for small maps, hexes in the style of operational wargames for large maps, to be worked out in between. **Drill-down** from the operational map to the close view: yes, in the first version.
 * **Neutrality:** both sides get equal chances and, absent a decisive imbalance, end in the same situation. The point is the cost of hubris and inhuman decisions, not a message for one side.
 
 
 ## Still open
 
-* Operational map style: hexes (Grigsby-like) or free areas, and whether drill-down to the close tactical view should be in the first version. Reference pictures welcome.
+* Mid-size maps: where exactly FS-style squares hand over to Grigsby-style hexes. My suggestion: hexes that can be opened into a few sub-cells, so one map language covers the in-between scale.
 * Visual style of the global map and strategic screens (reference pictures welcome; Frozen Synapse is enough for the tactical look).
 * How historical to be: real events and dates, a close alternate history, or a fictional timeline with real places?
 * How the player 'secures' remote assets in Act I: a small mini-game, a menu order, or a mission?
-* Should the current project's Blackout pack also get the humour treatment?
 * Final title: keep 'Thin Ice'?
 
