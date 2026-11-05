@@ -55,6 +55,23 @@ func los(ax: int, ay: int, bx: int, by: int, low_blocks: bool) -> bool:
 			return false
 	return true
 
+## Distance from (ax,ay) to the first LOW tile on the segment towards (bx,by), or -1 if none.
+func first_low(ax: int, ay: int, bx: int, by: int) -> int:
+	var dx: int = bx - ax
+	var dy: int = by - ay
+	var d: int = Fx.isqrt(dx * dx + dy * dy)
+	if d == 0:
+		return -1
+	var steps: int = d / 250 + 1
+	for i in range(1, steps):
+		if at_pos(ax + dx * i / steps, ay + dy * i / steps) == LOW:
+			return d * i / steps
+	return -1
+
+## True if the tile is on the outer border of the map (the "edge of the field").
+func is_border(tx: int, ty: int) -> bool:
+	return tx <= 0 or ty <= 0 or tx >= w - 1 or ty >= h - 1
+
 ## Turn WALL/LOW tiles whose centre is within r of (cx,cy) into floor. Returns [[tx,ty],...].
 func destroy_in_radius(cx: int, cy: int, r: int) -> Array:
 	var out: Array = []

@@ -6,13 +6,14 @@ const AI = preload("res://sim/ai.gd")
 const Board = preload("res://ui/board.gd")
 const Balance = preload("res://sim/balance.gd")
 
-const MODES := ["extermination", "secure", "disputed", "hostage", "charge"]
+const MODES := ["extermination", "secure", "disputed", "hostage", "charge", "upload"]
 const MODE_TEXT := {
-	"extermination": "Extermination — destroy every enemy unit.",
-	"secure": "Secure — the attacker (green) must hold the yellow zone; the defender must survive 12 turns.",
-	"disputed": "Disputed — carry yellow boxes to your own side's exit; a majority wins.",
-	"hostage": "Hostage — the attacker frees hostages by standing next to them; killing one forfeits.",
-	"charge": "Charge — the attacker must push a unit past the yellow line within 12 turns.",
+	"extermination": "Extermination — destroy every enemy unit (8 turns).",
+	"secure": "Secure — the defender deploys in the yellow zone. The attacker must survive 3 s inside it after turn 2.",
+	"disputed": "Disputed — boxes appear after turn 4. Carry a box into a green edge zone to score it.",
+	"hostage": "Hostage — the rescuer (green) orders the hostages from turn 2 and gets one to a green edge. Hostages are safe inside the yellow square.",
+	"charge": "Charge — the attacker must hold a unit on or past the yellow line for the last 3 s of turn 6.",
+	"upload": "Upload — kill the enemy hacker (H) before they kill yours (8 turns). Hackers are marked K.",
 }
 
 var game
@@ -142,6 +143,7 @@ func _build_game() -> void:
 		["Wait at last point  (W)", func(): board.cycle_wait()],
 		["Fire at point  (F)", func(): board.set_tool("fire")],
 		["Ignore enemy  (I)", func(): board.set_tool("ignore")],
+		["Continue on sight  (C)", func(): board.toggle_cos()],
 		["Undo last  (Backspace)", func(): board.remove_last_waypoint()],
 		["Clear unit orders  (Del)", func(): board.clear_orders()],
 		["Next unit  (Tab)", func(): board.select_next()],
@@ -210,7 +212,8 @@ func _on_start() -> void:
 	var opts := {"squad": int(squad_spin.value)}
 	var mode: String = MODES[mode_opt.selected]
 	if mode == "charge":
-		opts["bid"] = 14
+		opts["bid0"] = 14
+		opts["bid1"] = 12
 	game = Match.create(mode, int(seed_spin.value), dark_chk.button_pressed, opts)
 	board.set_game(game)
 	committed = {}
@@ -349,6 +352,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			KEY_A: board.set_tool("aim")
 			KEY_F: board.set_tool("fire")
 			KEY_I: board.set_tool("ignore")
+			KEY_C: board.toggle_cos()
 			KEY_D: board.toggle_duck()
 			KEY_W: board.cycle_wait()
 			KEY_TAB: board.select_next()

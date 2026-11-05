@@ -218,16 +218,27 @@ static func _layout(g: PackedByteArray, w: int, h: int, rng, attacker: int) -> D
 	if zone_cands.is_empty():
 		return {}
 	var zc: Array = zone_cands[rng.below(zone_cands.size())]
+	# 3x3 all-floor square near the middle of the map (hostage start square)
+	var cz_cands: Array = []
+	for y in range(1, h - 3):
+		for x in range(w * 8 / 20, w * 11 / 20 + 1):
+			var ok2 := true
+			for dy in range(3):
+				for dx in range(3):
+					if g[(y + dy) * w + x + dx] != 0:
+						ok2 = false
+			if ok2:
+				cz_cands.append([x, y])
 	var boxes: Array = _pick_spaced(floor_in.call(w / 3, w * 2 / 3), 3, 4, rng)
-	var hx0: int = w * 13 / 20 if def_right else 5
-	var hx1: int = w - 6 if def_right else w * 7 / 20
-	var hostages: Array = _pick_spaced(floor_in.call(hx0, hx1), 2, 3, rng)
-	if boxes.size() < 3 or hostages.size() < 2:
+	if boxes.size() < 3 or cz_cands.is_empty():
 		return {}
+	var cz: Array = cz_cands[rng.below(cz_cands.size())]
+	var hostages: Array = [[cz[0], cz[1] + 1], [cz[0] + 2, cz[1] + 1]]
 	return {
 		"w": w, "h": h, "rows": rows, "attacker": attacker,
 		"spawn": {0: spawn0, 1: spawn1},
 		"zone": [zc[0], zc[1], zc[0] + 2, zc[1] + 2],
 		"boxes": boxes, "hostages": hostages,
+		"center_zone": [cz[0], cz[1], cz[0] + 2, cz[1] + 2],
 		"exits": {0: [1, 1, 2, h - 2], 1: [w - 3, 1, w - 2, h - 2]},
 	}

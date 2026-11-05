@@ -54,9 +54,9 @@ func test_ai_plans_valid() -> void:
 	print("ai plans")
 	var good := true
 	var timing := 0
-	for mode in ["extermination", "secure", "disputed", "hostage", "charge"]:
+	for mode in ["extermination", "secure", "disputed", "hostage", "charge", "upload"]:
 		for dark in [false, true]:
-			var g = Match.create(mode, 17, dark, {"bid": 14})
+			var g = Match.create(mode, 17, dark, {"bid0": 14, "bid1": 12})
 			var t0 := Time.get_ticks_msec()
 			var orders: Dictionary = AI.plan(g, 1, 17)
 			timing = maxi(timing, Time.get_ticks_msec() - t0)
@@ -93,8 +93,8 @@ func test_ai_vs_ai_modes() -> void:
 	print("ai vs ai full games")
 	var finished := 0
 	var total := 0
-	for mode in ["extermination", "secure", "disputed", "hostage", "charge"]:
-		var g = Match.create(mode, 5, false, {"bid": 14})
+	for mode in ["extermination", "secure", "disputed", "hostage", "charge", "upload"]:
+		var g = Match.create(mode, 5, false, {"bid0": 14, "bid1": 12})
 		var guard := 0
 		while not g.over and guard < 25:
 			var o0: Dictionary = AI.plan(g, 0, 5 + guard, 6)

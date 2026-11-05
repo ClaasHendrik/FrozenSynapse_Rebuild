@@ -16,7 +16,7 @@ static func plan(game, team: int, seed_value: int = 1, candidates: int = CANDIDA
 	var base = game.fog_clone(team)
 	var mine: Array = []
 	for u in base.units:
-		if u.alive and u.team == team:
+		if u.alive and game.can_order(team, game.sim.unit(u.id)):
 			mine.append(u)
 	var known: Array = []   # enemy units (alive in fogged clone)
 	for u in base.units:
@@ -59,21 +59,27 @@ static func _dest_for(game, base, u, known: Array) -> Array:
 				return [col * 1000 + 500, u.y]
 			return [(m["w"] - 1 if team == 1 else 0) * 500 + 1000, u.y] if near_enemy == null else [near_enemy.x, near_enemy.y]
 		"hostage":
-			var hostages: Array = []
-			for h in base.units:
-				if h.team == 2 and h.alive:
-					hostages.append(h)
-			var hn = _nearest(u, hostages)
-			if hn != null:
-				return [hn.x, hn.y]
+			if u.type == "hostage":
+				var ex0: Array = m["exits"][0]
+				var ex1: Array = m["exits"][1]
+				var left: bool = u.x < base.map.w * 500
+				var ex: Array = ex0 if left else ex1
+				return [(ex[0] + ex[2] + 1) * 500, u.y]
+			if not _is_attacker(game, team):
+				var sq: Array = m["square"]
+				return [(sq[0] + sq[2] + 1) * 500, (sq[1] + sq[3] + 1) * 500]
+			var sq2: Array = m["square"]
+			return [(sq2[0] + sq2[2] + 1) * 500, (sq2[1] + sq2[3] + 1) * 500]
 		"disputed":
-			if _carrying(m, u.id):
+			if _carrying(m, u.id) or m["active"] and m["boxes"].size() == 0:
 				var ex: Array = m["exits"][team]
 				return [(ex[0] + ex[2] + 1) * 500, u.y]
 			var best = null
 			var bd := 0x7FFFFFFFFFFF
+			if not m["active"]:
+				return [base.map.w * 500, base.map.h * 500]
 			for b in m["boxes"]:
-				if b["delivered"] or b["carrier"] >= 0:
+				if b["delivered"] or b["lost"] or b["carrier"] >= 0:
 					continue
 				var d: int = Fx.dist(u.x, u.y, b["x"], b["y"])
 				if d < bd:
@@ -125,6 +131,13 @@ static func _path(map, cache: Dictionary, u, dest: Array) -> Array:
 	return cache[key]
 
 static func _unit_order(game, base, u, known: Array, rng, cache: Dictionary, team: int) -> Dictionary:
+	if u.type == "hostage":
+		var hd: Array = _dest_for(game, base, u, known)
+		var hp: Array = _path(base.map, cache, u, hd)
+		var hpath: Array = []
+		for pt in hp:
+			hpath.append({"x": pt["x"], "y": pt["y"], "duck": false})
+		return {"path": hpath} if rng.below(100) < 60 else {}
 	var attacker: bool = _is_attacker(game, team)
 	var dest: Array = _dest_for(game, base, u, known)
 	var enemy = _nearest(u, known)
@@ -139,6 +152,8 @@ static func _unit_order(game, base, u, known: Array, rng, cache: Dictionary, tea
 		kind = "advance"
 	var order := {}
 	var wt: Dictionary = Balance.TYPES[u.type]
+	if wt["kind"] == "none":
+		kind = "advance" if attacker else "hold"
 	match kind:
 		"advance", "partial":
 			var p: Array = _path(base.map, cache, u, dest)
@@ -241,9 +256,7 @@ static func _evaluate(game, base, team: int, orders: Dictionary, scenario: int, 
 	if m["type"] == "disputed":
 		score += 10.0 * (m["score"][team] - boxes_before)
 	elif m["type"] == "hostage":
-		if m["forfeit"] == team:
-			score -= 60.0
-		score += 8.0 * m["freed"].size() * (1 if m["attacker"] == team else -1)
+		score += 12.0 * m["escaped"] * (1 if m["attacker"] == team else -1)
 	var res: Dictionary = Modes.result(sim, game.turn + 1)
 	if res["over"]:
 		if res["winner"] == team:

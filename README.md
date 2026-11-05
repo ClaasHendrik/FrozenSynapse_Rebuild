@@ -7,7 +7,8 @@ A personal-use, native (Godot 4) simultaneous-turn tactics game in the style of 
 - [x] Step 1: deterministic simulation core + tests (`sim/`, `tests/`)
 - [x] Step 2: procedural map generator, five game modes (Light/Dark), match flow (`sim/map_gen.gd`, `sim/modes.gd`, `sim/match.gd`)
 - [x] Step 3: planning UI, Test preview, replay, hotseat, look-ahead AI (`ui/`, `sim/ai.gd`, `sim/nav.gd`)
-- [ ] Campaign + packs, Linux packaging
+- [x] Step 3.5: rules brought in line with the original (deterministic time-to-kill combat, real mode rules, Upload mode) — see `docs/RULES_REFERENCE.md`
+- [ ] Campaign (55 missions, 19 chapters) + Red-style pack + bonus pack, Linux packaging
 
 ## Run the tests
 ```bash
@@ -22,7 +23,7 @@ godot --path .          # opens the menu: mode, Light/Dark, vs computer or hotse
 ```
 Controls: click a unit to select it, click the map to add waypoints (paths route around walls),
 right-click or Backspace to undo, **A** aim, **D** duck, **W** wait, **F** fire (rocket/grenade),
-**I** ignore an enemy, **Tab** next unit, **Space** Test preview, **Enter** commit turn.
+**I** ignore an enemy, **C** continue on sight, **Tab** next unit, **Space** Test preview, **Enter** commit turn.
 Replay: Space pause, +/- speed, drag the timeline, Enter skips.
 Hotseat Dark mode shows the whole replay to both players (fog applies only while planning).
 

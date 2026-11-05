@@ -19,7 +19,7 @@ const COL_WALL := Color("2d8cff")
 const COL_WALL_EDGE := Color("8fd0ff")
 const COL_LOW := Color("2a5fa8")
 const TEAM_COL := [Color("39ff88"), Color("ff4d5e"), Color("ffd24a")]
-const LETTER := {"mg": "M", "shotgun": "S", "sniper": "N", "rocket": "R", "grenade": "G", "riot": "B", "hostage": "H"}
+const LETTER := {"mg": "M", "shotgun": "S", "sniper": "N", "rocket": "R", "grenade": "G", "riot": "B", "hostage": "H", "hacker": "K", "commando": "C", "devastator": "D", "civilian": "V"}
 
 var game = null
 var view_team := 0
@@ -117,7 +117,9 @@ func _orders_for(id: int) -> Dictionary:
 
 func _can_order(id: int) -> bool:
 	var u = _unit(id)
-	return u != null and u.alive and u.team < 2 and _is_visible_unit(u)
+	if u == null or not u.alive or not _is_visible_unit(u):
+		return false
+	return game.can_order(view_team, u) or (u.team < 2 and u.team != view_team)
 
 func _is_visible_unit(u) -> bool:
 	if u.team == view_team or not game.dark:
@@ -206,6 +208,14 @@ func toggle_duck() -> void:
 	orders_changed.emit()
 	queue_redraw()
 
+func toggle_cos() -> void:
+	if selected < 0:
+		return
+	var o := _orders_for(selected)
+	o["cos"] = not o.get("cos", false)
+	orders_changed.emit()
+	queue_redraw()
+
 func cycle_wait() -> void:
 	if selected < 0:
 		return
@@ -245,7 +255,7 @@ func unit_info() -> String:
 	s += "Waypoints: %d\n" % o.get("path", []).size()
 	if wt["kind"] == "rocket" or wt["kind"] == "grenade":
 		s += "Fire order: %s\n" % ("set" if o.has("fire") else "none")
-	s += "Ignoring: %d" % o.get("ignore", []).size()
+	s += "Ignoring: %d%s" % [o.get("ignore", []).size(), "  [continue on sight]" if o.get("cos", false) else ""]
 	return s
 
 # ------------------------------------------------------------------ geometry
@@ -275,7 +285,8 @@ func _compute_vis() -> void:
 	for u in game.sim.units:
 		if not u.alive or u.team != view_team:
 			continue
-		var r: int = Balance.TYPES[u.type]["vision"]
+		var r: int = Balance.SIGHT_RANGE
+		var fov: int = Balance.TYPES[u.type]["fov"]
 		var tx0: int = maxi(0, (u.x - r) / 1000)
 		var tx1: int = mini(m.w - 1, (u.x + r) / 1000)
 		var ty0: int = maxi(0, (u.y - r) / 1000)
@@ -286,7 +297,7 @@ func _compute_vis() -> void:
 					continue
 				var cx: int = tx * 1000 + 500
 				var cy: int = ty * 1000 + 500
-				if (cx - u.x) * (cx - u.x) + (cy - u.y) * (cy - u.y) <= r * r:
+				if (cx - u.x) * (cx - u.x) + (cy - u.y) * (cy - u.y) <= r * r and Fx.angle_diff(u.facing, Fx.atan2_dd(cy - u.y, cx - u.x)) <= fov:
 					if m.los(u.x, u.y, cx, cy, false) or (m.tile(tx, ty) == SimMap.WALL and m.los(u.x, u.y, cx - signi(cx - u.x) * 400, cy - signi(cy - u.y) * 400, false)):
 						vis[ty * m.w + tx] = 1
 
@@ -409,20 +420,25 @@ func _draw_objectives(f: int) -> void:
 		"disputed":
 			for t in range(2):
 				var e: Array = md["exits"][t]
-				var c: Color = TEAM_COL[t]
-				c.a = 0.12
+				var c := Color(0.3, 1, 0.5, 0.12 if md["active"] else 0.04)
 				draw_rect(Rect2(origin + Vector2(e[0], e[1]) * ts, Vector2(e[2] - e[0] + 1, e[3] - e[1] + 1) * ts), c)
 			var boxes: Array = []
 			if phase == "replay" and f < rframes.size() and not rframes[f]["b"].is_empty():
 				boxes = rframes[f]["b"]
 			else:
 				for b in md["boxes"]:
-					boxes.append([b["x"], b["y"], b["delivered"]])
+					boxes.append([b["x"], b["y"], b["delivered"] or not md["active"]])
 			for b in boxes:
 				if b[2]:
 					continue
 				var p := _p(b[0], b[1])
 				draw_rect(Rect2(p - Vector2(ts, ts) * 0.2, Vector2(ts, ts) * 0.4), yellow)
+		"hostage":
+			var sq: Array = md["square"]
+			draw_rect(Rect2(origin + Vector2(sq[0], sq[1]) * ts, Vector2(sq[2] - sq[0] + 1, sq[3] - sq[1] + 1) * ts), yellow, false, 2.0)
+			for t in range(2):
+				var e2: Array = md["exits"][t]
+				draw_rect(Rect2(origin + Vector2(e2[0], e2[1]) * ts, Vector2(e2[2] - e2[0] + 1, e2[3] - e2[1] + 1) * ts), Color(0.3, 1, 0.5, 0.08))
 		"charge":
 			var bx: int = md["bid"] if md["attacker"] == 0 else md["w"] - 1 - md["bid"]
 			var x := origin.x + (bx + (0.5)) * ts
@@ -541,14 +557,15 @@ func _replay_visible(f: int) -> Dictionary:
 		var ua = _unit(a[0])
 		if ua.team != rview or not a[4]:
 			continue
-		var vr: int = Balance.TYPES[ua.type]["vision"]
+		var vr: int = Balance.SIGHT_RANGE
+		var fovr: int = Balance.TYPES[ua.type]["fov"]
 		for b in fr["u"]:
 			var ub = _unit(b[0])
 			if ub.team == rview or not b[4] or _rvis_ids.has(b[0]):
 				continue
 			var dx: int = b[1] - a[1]
 			var dy: int = b[2] - a[2]
-			if dx * dx + dy * dy <= vr * vr and _rmap.los(a[1], a[2], b[1], b[2], bool(a[5]) or bool(b[5])):
+			if dx * dx + dy * dy <= vr * vr and Fx.angle_diff(a[3], Fx.atan2_dd(dy, dx)) <= fovr and _rmap.los(a[1], a[2], b[1], b[2], bool(a[5]) or bool(b[5])):
 				_rvis_ids[b[0]] = true
 	return _rvis_ids
 
