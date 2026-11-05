@@ -34,3 +34,12 @@ logic of the storyline.
 * The current project (Cold Synapse) is a private-use rebuild of a commercial game and stays private. Anything meant to
   be published should be the new game.
 * macOS builds need signing/notarisation through an Apple developer account for other people's Macs.
+
+## Answers to the open questions in design draft 1
+* Global map from the first mission; everything reachable, so assets (units, caches, scientists, a seed vault) can be
+  secured in remote corners early; this pays off in the last act.
+* Branches change in varying degrees after each mission and each between-mission decision.
+* Tone: realistically dark. Never joke about the results of the war; dealing with them is fine. Humour everywhere else,
+  as dark as possible, always respecting life, showing enemies as human beings and resisting propaganda.
+* Neutral writing: both sides have equal chances and, absent a decisive imbalance, end in the same situation. The theme is
+  the cost of human hubris and inhuman decisions, idealistically, not propaganda for either side.

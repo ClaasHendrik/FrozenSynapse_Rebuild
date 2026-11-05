@@ -1,4 +1,4 @@
-# THIN ICE (working title): design document, draft 1
+# THIN ICE (working title): design document, draft 2
 
 _A Cold War campaign that escalates from spy games to the end of the world, and then asks whether we could just stop._
 
@@ -11,7 +11,9 @@ _A Cold War campaign that escalates from spy games to the end of the world, and 
 * **Few rules, deep consequences.** Small unit and resource sets; depth from positioning, timing and what you choose to give up.
 * **Two layers that talk.** The between-mission layer shapes missions, and missions reshape the layer. The closer to the war's centre, the tighter the loop.
 * **Escalation is the story.** Scale, tone and goals change act by act. Scores (escalation, civilian cost) appear only where they make sense.
-* **Dark humour with a heart.** The jokes come from bureaucracy and human foibles, grow darker with the stakes, and the ending is sincere.
+* **A whole world from the first day.** The global map is open from the start: you may send anything anywhere, even where it makes no sense yet.
+* **Both sides, equal chances.** Written neutrally. Neither bloc is the hero. The game shows what human hubris and inhuman decisions cost, whoever you play.
+* **Realistically dark, with humour.** Humour is part of normal human life even in the worst of times, so it runs through the whole game. The results of the war are never a joke; living with them is.
 
 
 ## At a glance
@@ -38,7 +40,7 @@ _A Cold War campaign that escalates from spy games to the end of the world, and 
 | VI World | A Defcon-like world map. Stockpiles, launches, defences | Short, tense turns of days or hours. Choose targets, or choose not to | Almost all of the game is here | Civilian cost, survivors, time bought |
 | VII Second Try | A launch site, a colony ship. Former enemies cooperate | Escort, defend, recruit, repair. Goals reverse: protect, not destroy | Trust becomes a resource that bridges the blocs | People saved, ship readiness, trust |
 
-Which side starts the Fulda Gap invasion is decided by the story, not fixed: earlier choices in Acts I and II (and which side you play) tip it either way, so it can surprise you. Each side's campaign is a mirror in structure but not in tools: NATO leans on alliance cohesion and air power, the Pact on discipline and mass, and each has its own jokes.
+**Decisions:** the game has a **global map from the very first mission**. Any unit or asset can be sent anywhere, even where it seems pointless, so you can quietly secure things in remote corners (an Antarctic station, a Pacific atoll, a seed vault, fuel caches, a few aircraft, a scientist or two) that nobody else is watching. These long-term investments are the bridge to Act VII. **Branches** bend by degrees after every mission and every between-mission decision, so the Fulda Gap invasion can start from either side, or never in the form you expected. Both campaigns are mirrors in structure with different tools, and the stories are written neutrally: with no side decisively stronger, both end up in the same place, which is what 'equal chances' means here.
 
 
 # 2. Two layers that talk to each other
@@ -72,8 +74,9 @@ Humour is part of the design, not decoration. It has three registers, and the ga
 
 ## Principles
 
-* **Jokes come from institutions and people, never from victims.** Bureaucracy, committees, paperwork, politicians' vanity, gadgets that were over-promised.
-* **The darker the stakes, the drier the delivery.** Act I is playful, Act IV is gallows humour, Act VII is warm.
+* **Jokes come from institutions and people, never from the dead.** The results of the war are never joked about; dealing with the results is just part of the new world, and that can be funny and human.
+* **As dark as it gets.** The darker the stakes, the drier the delivery. Act I is playful, Act IV is gallows humour, Act VI is black, Act VII is warm.
+* **Enemies are people.** They have names, letters home and bad canteens. The game resists the official line on both sides, and the jokes are often at propaganda's expense.
 * **The ending is sincere.** The last joke is on the idea that we needed a war to figure this out.
 * **Humour carries information.** The funniest line in a briefing is usually also the useful one.
 
@@ -102,6 +105,12 @@ Humour is part of the design, not decoration. It has three registers, and the ga
 * **The radio request line:** a cheerful DJ plays dedications during the Act VI countdown, and reads out the weather in places that no longer have any.
 * **The civil-defence film narrator** keeps explaining how to stay calm, long after it stopped helping.
 * **The colony-ship naming committee** and the seating chart dispute, settled by a coin toss between two armies who just stopped shooting each other.
+* **Communiqués swapped:** the Statement of the Day from each bloc is word for word the same with the names exchanged. The game quietly puts them side by side.
+* **Official Version / What the Sensors Say:** every briefing carries both. With enough Intel you see the second. It is rarely flattering and often funny.
+* **The Ministry of Optimism** issues a weekly bulletin: 'Supplies are not low, merely ambitious.'
+* **Intercepted chatter** from the other side is mundane and human: a sergeant composing a poem, a conscript arguing about the canteen. Capturing them is a decision, not a score.
+* **Mandatory-fun officer** in the shelter schedules a talent show. Someone's grandmother wins it.
+* **Casualty form 14-B** requires you to first submit form 14-A, which requires a casualty.
 
 
 # 4. Build, platforms and originality
@@ -126,11 +135,19 @@ Humour is part of the design, not decoration. It has three registers, and the ga
 | 6 | Acts IV to VII in outline, then in full | The whole arc |
 
 
-## Open questions
+## Decisions made by the project owner
 
-* How much of the strategic layer should be a map and how much cards and menus?
-* How fixed is the story, and how much can the player bend it? (My proposal: fixed set pieces with branches.)
-* How dark should Act VI go, and how should the civilian cost be shown? (My proposal: shown plainly, never as a joke.)
-* Which side should the very first campaign be written for?
-* Should the humour also be added to the current project's own-missions pack (Blackout)?
+* **Global map from the beginning,** with every location reachable, to allow securing units and assets in remote corners early.
+* **Branches** change in varying degrees after each mission and each between-mission decision.
+* **Tone:** realistically dark. The results of war are never joked about; dealing with them is fine. Humour everywhere else, as dark as it gets, always respecting life and the humanity of enemies, and resisting propaganda.
+* **Neutrality:** both sides get equal chances and, absent a decisive imbalance, end in the same situation. The point is the cost of hubris and inhuman decisions, not a message for one side.
+
+
+## Still open
+
+* Visual style of the global map and strategic screens (reference pictures welcome; Frozen Synapse is enough for the tactical look).
+* How historical to be: real events and dates, a close alternate history, or a fictional timeline with real places?
+* How the player 'secures' remote assets in Act I: a small mini-game, a menu order, or a mission?
+* Should the current project's Blackout pack also get the humour treatment?
+* Final title: keep 'Thin Ice'?
 
