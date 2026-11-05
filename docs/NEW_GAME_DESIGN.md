@@ -113,7 +113,32 @@ Humour is part of the design, not decoration. It has three registers, and the ga
 * **Casualty form 14-B** requires you to first submit form 14-A, which requires a casualty.
 
 
-# 4. Build, platforms and originality
+# 4. Maps and units change with the scale
+
+The Frozen Synapse style (a close, extruded, glowing grid with individual figures) fits Act I. It cannot carry brigades, supply lines or a world. So the presentation changes with each act toward the conventions of operational wargames, while the **planning loop and the neon look stay the same** (plan together, preview, resolve, replay).
+
+| Act | Map | Units shown as | Time per turn | What changes in the rules |
+|---|---|---|---|---|
+| I Spies | Close tactical grid of streets and buildings (the current style) | Individual figures with facing and stance | Minutes | Line of sight, cover, timing and noise |
+| II Border | Tactical map with terrain: forest, towns, rivers, roads. Zoom between figure and counter view | Squads and platoons as small glowing counters, with figures when zoomed in | Hours | Terrain costs, roads, observation posts, artillery with spotting |
+| III Invasion | Operational map (hexes or areas): terrain, rivers, bridges, cities, front line, zones of control | Battalion and brigade counters with original NATO-style symbols and strength steps; unknown contacts as '?' | Half a day to a day | Supply lines and depots, bridge capacity, air missions as a layer, aggregated deterministic combat |
+| IV Threshold | Operational map plus contamination and launch-warning overlays | Counters and strategic assets | Hours | Escalation panel, no-go zones, consent of allies |
+| V Wasteland | Ruined region map with routes, shelters, hot zones | Convoys, shelters and survivor groups | Days | Scarcity overlays (fuel, medicine, morale), radiation as terrain |
+| VI World | Defcon-like vector world map | Silos, submarines, bombers, fighters, missiles with arcs | Hours to days | Stockpiles, launch timing, defence, countdown clock |
+| VII Second Try | Launch-site map plus the world logistics map | Mixed | Hours to days | Trust, repair and escort, protect-not-destroy goals |
+
+
+## Design rules for the larger scales
+
+* **One visual language.** Counters, borders, supply lines and arrows are glowing vector shapes in the same neon style, so the game never looks like three different games.
+* **Aggregated, deterministic combat.** A formation has a few strength steps, a supply state and a posture. The result depends on terrain, supply, surprise and posture, with no dice, so the preview is exact. The old ideas of 'stillness' and 'first sight' become dug-in, moving and ambushed.
+* **Fog of war by contacts.** You see what your sensors see: confirmed positions, last-known positions and '?' counters. The Official Version / Sensors view from the humour section lives here.
+* **Drill-down.** A decisive engagement can be opened as a close tactical view (the current style) and played, or resolved automatically. Results flow back to the operational map.
+* **Plan in the same way.** Drawing a route, a front-line order, a supply route or a missile arc, then testing it on a copy of the game, is the same gesture at every scale.
+* **Readability first.** A few unit types per act, large clear symbols, and a map that is usable in one evening of learning.
+
+
+# 5. Build, platforms and originality
 
 * **Engine:** Godot 4 with a deterministic, integer-based simulation core reused from the current project: orders, preview on a copy, replay, fog of war, and the same style of automated tests.
 * **New modules:** the strategic layer (tracks, order slots, effects as data), campaign state with branches, scale adapters for each act, and a longer-turn planner and AI.
@@ -145,6 +170,7 @@ Humour is part of the design, not decoration. It has three registers, and the ga
 
 ## Still open
 
+* Operational map style: hexes (Grigsby-like) or free areas, and whether drill-down to the close tactical view should be in the first version. Reference pictures welcome.
 * Visual style of the global map and strategic screens (reference pictures welcome; Frozen Synapse is enough for the tactical look).
 * How historical to be: real events and dates, a close alternate history, or a fictional timeline with real places?
 * How the player 'secures' remote assets in Act I: a small mini-game, a menu order, or a mission?
