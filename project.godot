@@ -5,6 +5,7 @@ config_version=5
 
 config/name="Cold Synapse"
 config/features=PackedStringArray("4.3")
+run/main_scene="res://ui/main.tscn"
 
 [display]
 
