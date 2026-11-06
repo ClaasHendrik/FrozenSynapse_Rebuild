@@ -50,6 +50,7 @@ func _init() -> void:
 	test_shield()
 	test_orders_ignore_cos_focus()
 	test_commando_devastator()
+	test_check_order()
 	test_determinism()
 	print("\n%d passed, %d failed" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -335,6 +336,22 @@ func test_commando_devastator() -> void:
 	s.set_orders(d, {"fires": [{"x": c(8), "y": c(4), "tick": 0}, {"x": c(8), "y": c(4), "tick": 20}, {"x": c(8), "y": c(4), "tick": 40}]})
 	s.run_turn()
 	check(s.events.filter(func(e): return e["type"] == "launch").size() >= 3, "devastator fires several rockets in one turn")
+
+func test_check_order() -> void:
+	print("check order")
+	var s = Sim.create(open_map(), 1)
+	var a = s.add_unit(0, "mg", 5, 4, 0)
+	var b = s.add_unit(1, "mg", 12, 6, 1800)
+	s.set_orders(a, {"path": [{"x": c(8), "y": c(4), "check_x": c(8), "check_y": c(8)}, {"x": c(14), "y": c(4)}]})
+	s.set_orders(b, {"cos": true})
+	s.run_turn()
+	check(s.unit(a).x > c(8), "a unit with a Check order still finishes its route")
+	var s2 = Sim.create(open_map(), 1)
+	var a2 = s2.add_unit(0, "mg", 5, 4, 0)
+	s2.set_orders(a2, {"path": [{"x": c(8), "y": c(4), "check_x": c(8), "check_y": c(8)}]})
+	for i in range(31):
+		s2.step()
+	check(s2.unit(a2).facing > 800 and s2.unit(a2).facing < 1000, "it glances towards the checked point (facing %d)" % s2.unit(a2).facing)
 
 func test_determinism() -> void:
 	print("determinism")

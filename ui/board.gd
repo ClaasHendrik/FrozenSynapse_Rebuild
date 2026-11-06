@@ -37,6 +37,9 @@ var origin := Vector2.ZERO
 var tiles := PackedByteArray()
 var vis := PackedByteArray()
 var fog_tex: ImageTexture = null
+var light_tex: ImageTexture = null    # soft light pools (line of sight of the viewing team)
+var _light_frame := -99
+var flash_t := 0.0                     # "NEXT TURN" flash timer
 var _rmap = null
 var _base_tiles := PackedByteArray()
 
@@ -80,8 +83,15 @@ func begin_plan(team: int) -> void:
 	phase = "plan"
 	tiles = game.sim.map.t.duplicate()
 	_compute_vis()
+	var pts: Array = []
 	for u in game.sim.units:
 		if u.alive and u.team == team:
+			pts.append([u.x, u.y, u.ducked])
+	light_tex = build_light(game.sim.map, pts, 2)
+	if game.turn > 0:
+		flash_t = 1.5
+	for u in game.sim.units:
+		if u.alive and u.team == team and game.can_order(team, u):
 			selected = u.id
 			break
 	selection_changed.emit()
@@ -116,6 +126,27 @@ func end_replay() -> void:
 
 func replay_length() -> float:
 	return float(maxi(rframes.size() - 1, 1)) / 20.0
+
+## Soft light pools: which parts of the floor the given units can see (line of sight, no field of view limit).
+func build_light(m, pts: Array, res: int) -> ImageTexture:
+	var img := Image.create(m.w * res, m.h * res, false, Image.FORMAT_RGBA8)
+	for sy in range(m.h * res):
+		for sx in range(m.w * res):
+			var wx: int = int((float(sx) + 0.5) / float(res) * 1000.0)
+			var wy: int = int((float(sy) + 0.5) / float(res) * 1000.0)
+			var best := 0.0
+			if m.at_pos(wx, wy) != SimMap.WALL:
+				for p in pts:
+					var dx: int = wx - p[0]
+					var dy: int = wy - p[1]
+					var d2: int = dx * dx + dy * dy
+					if d2 > 18000 * 18000:
+						continue
+					if m.los(p[0], p[1], wx, wy, bool(p[2])):
+						var f: float = 1.0 - sqrt(float(d2)) / 18000.0
+						best = maxf(best, f * f * 0.7 + 0.3 * f)
+			img.set_pixel(sx, sy, Color(0.22, 0.5, 1.0, best))
+	return ImageTexture.create_from_image(img)
 
 # ------------------------------------------------------------------ order editing
 
@@ -230,6 +261,66 @@ func toggle_cos() -> void:
 	orders_changed.emit()
 	queue_redraw()
 
+func cancel_aim() -> void:
+	if selected < 0:
+		return
+	var o := _orders_for(selected)
+	if o["path"].is_empty():
+		o.erase("aim")
+	else:
+		o["path"][-1]["aim_x"] = -1
+		o["path"][-1]["aim_y"] = -1
+	orders_changed.emit()
+	queue_redraw()
+
+func set_stance(duck: bool) -> void:
+	if selected < 0:
+		return
+	var o := _orders_for(selected)
+	if o["path"].is_empty():
+		o["duck"] = duck
+	else:
+		o["path"][-1]["duck"] = duck
+	orders_changed.emit()
+	queue_redraw()
+
+func set_check(id: int, wx: int, wy: int) -> void:
+	var o := _orders_for(id)
+	if o["path"].is_empty():
+		var u = _unit(id)
+		o["path"].append({"x": u.x, "y": u.y, "wait": 0, "duck": o.get("duck", u.ducked), "aim_x": -1, "aim_y": -1})
+	o["path"][-1]["check_x"] = wx
+	o["path"][-1]["check_y"] = wy
+	orders_changed.emit()
+	queue_redraw()
+
+func engage_on_sight() -> void:
+	if selected < 0:
+		return
+	_orders_for(selected)["cos"] = false
+	orders_changed.emit()
+	queue_redraw()
+
+func toggle_focus(id: int, enemy_id: int) -> void:
+	var o := _orders_for(id)
+	var lst: Array = o.get("focus", [])
+	if lst.has(enemy_id):
+		lst.erase(enemy_id)
+	else:
+		lst.append(enemy_id)
+	o["focus"] = lst
+	orders_changed.emit()
+	queue_redraw()
+
+func clear_focus_ignore() -> void:
+	if selected < 0:
+		return
+	var o := _orders_for(selected)
+	o["focus"] = []
+	o["ignore"] = []
+	orders_changed.emit()
+	queue_redraw()
+
 func cycle_wait() -> void:
 	if selected < 0:
 		return
@@ -255,6 +346,23 @@ func select_next() -> void:
 	selected = mine[(i + 1) % mine.size()]
 	selection_changed.emit()
 	queue_redraw()
+
+func select_prev() -> void:
+	var mine: Array = []
+	for u in game.sim.units:
+		if u.alive and u.team == view_team and game.can_order(view_team, u):
+			mine.append(u.id)
+	if mine.is_empty():
+		return
+	var i: int = mine.find(selected)
+	selected = mine[(i - 1 + mine.size()) % mine.size()]
+	selection_changed.emit()
+	queue_redraw()
+
+func selected_weapon_name() -> String:
+	if selected < 0 or game == null or _unit(selected) == null:
+		return "NO UNIT"
+	return String(Balance.TYPES[_unit(selected).type]["name"]).to_upper()
 
 func unit_info() -> String:
 	if selected < 0 or game == null:
@@ -378,14 +486,37 @@ func _gui_input(event: InputEvent) -> void:
 				if selected >= 0 and hit != null and hit.team != _unit(selected).team:
 					toggle_ignore(selected, hit.id)
 				tool = "path"
+			"focus":
+				if selected >= 0 and hit != null and hit.team != _unit(selected).team:
+					toggle_focus(selected, hit.id)
+				tool = "path"
+			"check":
+				if selected >= 0:
+					set_check(selected, w.x, w.y)
+				tool = "path"
 		selection_changed.emit()
 		queue_redraw()
 
 # ------------------------------------------------------------------ replay timing
 
 func _process(delta: float) -> void:
+	if flash_t > 0.0:
+		flash_t = maxf(0.0, flash_t - delta)
+		queue_redraw()
 	if phase != "replay":
 		return
+	var lf: int = int(rt * 20.0 / 10.0)
+	if lf != _light_frame and not rframes.is_empty():
+		_light_frame = lf
+		var fi: int = clampi(int(rt * 20.0), 0, rframes.size() - 1)
+		var lp: Array = []
+		for a in rframes[fi]["u"]:
+			var lu = _unit(a[0])
+			if a[4] and (lu.team == rview or rshow_all or not game.dark):
+				if lu.team == rview or rshow_all:
+					lp.append([a[1], a[2], bool(a[5])])
+		_rmap.t = _tiles_at(fi)
+		light_tex = build_light(_rmap, lp, 1)
 	if not rpaused:
 		rt += delta * rspeed
 	if rt >= replay_length():

@@ -105,13 +105,13 @@ func _init_seen() -> void:
 				continue
 			var shown: bool = mode_name == "extermination" or mode_name == "disputed" or (mode_name == "hostage" and e.team == 2)
 			if shown:
-				last_seen[t][e.id] = [e.x, e.y]
+				last_seen[t][e.id] = [e.x, e.y, 0]
 
 func _update_seen() -> void:
 	for t in range(2):
 		for id in sim.visible_to_team(t):
 			var e = sim.unit(id)
-			last_seen[t][id] = [e.x, e.y]
+			last_seen[t][id] = [e.x, e.y, turn]
 
 ## Copy of the sim as the given team may know it. In Dark mode enemies it cannot see are
 ## moved to their last-known position, or removed if never seen (used by Test preview and the AI).

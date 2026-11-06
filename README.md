@@ -28,6 +28,7 @@ Controls: click a unit to select it, click the map to add waypoints (paths route
 Backspace to undo, **A** aim, **D** duck, **W** wait, **F** fire (rocket/grenade),
 **I** ignore an enemy, **C** continue on sight, **Tab** next unit, **Space** Test preview, **Enter** commit turn.
 Replay: Space pause, +/- speed, drag the timeline, Enter skips.
+Orders now also include **K** Check (glance at a point for 1 s while moving), **O** Focus on an enemy, Stand/Duck, Engage on Sight, Clear Focus/Ignore (all in the top-edge bar and the right-click menu).
 Hotseat Dark mode shows the whole replay to both players (fog applies only while planning).
 
 Screenshots under a virtual display (used for visual checks):

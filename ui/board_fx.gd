@@ -15,3 +15,4 @@ func _ready() -> void:
 func _draw() -> void:
 	if board != null and board.game != null:
 		View.draw_glow(board, self)
+		View.draw_flash(board, self)

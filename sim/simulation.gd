@@ -68,6 +68,7 @@ func set_orders(id: int, o: Dictionary) -> void:
 		u.path.append({
 			"x": wp["x"], "y": wp["y"], "wait": wp.get("wait", 0) * 20,
 			"duck": wp.get("duck", u.ducked), "aim_x": wp.get("aim_x", -1), "aim_y": wp.get("aim_y", -1),
+			"check_x": wp.get("check_x", -1), "check_y": wp.get("check_y", -1),
 		})
 	u.wp_i = 0
 	u.wait_left = 0
@@ -167,6 +168,11 @@ func _move(u) -> void:
 			u.aim_y = wp["aim_y"]
 			u.facing = Fx.atan2_dd(u.aim_y - u.y, u.aim_x - u.x)
 		u.wait_left = wp["wait"]
+		if wp["check_x"] >= 0:
+			# "Check": glance towards a point for one second, then carry on with the normal orders
+			if not u.aim_lock:
+				u.facing = Fx.atan2_dd(wp["check_y"] - u.y, wp["check_x"] - u.x)
+			u.wait_left = maxi(u.wait_left, 20)
 		u.wp_i += 1
 		return
 	var nx: int = u.x + dx * speed / d

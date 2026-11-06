@@ -42,6 +42,11 @@ var overlay_action2: Callable
 var menu_box: Control
 var game_box: Control
 var side_label: Label
+var plan_row: HBoxContainer
+var replay_row: HBoxContainer
+var unit_row: HBoxContainer
+var turn_label: Label
+var weapon_label: Label
 var topbar: PanelContainer
 var ctx: PopupMenu
 var _ctx_world := Vector2i.ZERO
@@ -207,16 +212,40 @@ func _refresh_campaign() -> void:
 			b.pressed.connect(func(): _show_briefing(cc, mm))
 			row.add_child(b)
 
+const TICKERS := [
+	"SYNDICATED NEWS: The Ministry of Optimism reports that supplies are not low, merely ambitious.   ***   Weather: unsettled, with a chance of paperwork.",
+	"SYNDICATED NEWS: Local committee forms subcommittee to study the committee.   ***   Cheese prices steady, which the cheese inspectorate calls 'suspicious'.",
+	"SYNDICATED NEWS: Official statement: nothing happened. Unofficial statement: it happened quietly.   ***   Reminder: Form 14-B requires Form 14-A.",
+	"SYNDICATED NEWS: Border patrol praised for 'thoroughly observing' the weather.   ***   Canteen coffee declared a strategic asset.",
+]
+const SPEAKERS := {"Nashar Ward": ["Nox", "Soulsbury"], "Power Station": ["Smith", "Nox"], "The Broadcast Studio": ["Nox", "Davies"], "Blue Daylight": ["Cole", "Davies"],
+	"Cairn Dwelling": ["Cole", "Davies"], "Novena Quarter": ["Eshe", "Nox"], "Ninstar Tower": ["Eshe", "Nox"], "Dillenger's Villa": ["Riordan", "Nox"]}
+
+var briefing: Control = null
+
 func _show_briefing(ci: int, m: Dictionary) -> void:
 	var chap: Dictionary = campaign_pack["chapters"][ci]
 	var probe = Match.create_mission(m)
-	var txt := "%s\n\n" % chap["title"]
-	if chap["missions"][0]["id"] == m["id"]:
-		txt += chap["intro"] + "\n\n"
-	txt += "Mission %d — %s\n%s\n\n%s\n\nYour squad: %d   Enemy: %d   Turns: %d%s" % [
-		m["id"], m["title"], m["brief"], "\n".join(probe.objective_lines()),
-		probe.sim.alive_count(0), probe.sim.alive_count(1), m.get("turns", 8), "   (Dark)" if m.get("dark", false) else ""]
-	_show_overlay(txt, "Start mission", func(): _start_mission(m), "Back", func(): _show_phase("campaign"))
+	var objectives: Array = [m["brief"], ""]
+	objectives.append_array(probe.objective_lines())
+	objectives.append("Squad %d  ·  enemy %d  ·  %d turns%s" % [probe.sim.alive_count(0), probe.sim.alive_count(1), m.get("turns", 8), "  ·  Dark" if m.get("dark", false) else ""])
+	var titles: Array = []
+	var idx := 0
+	for k in range(chap["missions"].size()):
+		titles.append(chap["missions"][k]["title"])
+		if chap["missions"][k]["id"] == m["id"]:
+			idx = k
+	var who: Array = SPEAKERS.get(chap["title"], ["Nox", "Davies"])
+	if briefing != null:
+		briefing.queue_free()
+	briefing = load("res://ui/briefing.gd").new()
+	briefing.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(briefing)
+	briefing.setup("%s - %s" % [chap["title"], m["title"]], "Mission %d  ·  %s" % [m["id"], campaign_pack.get("title", "")], objectives, TICKERS[int(m["id"]) % TICKERS.size()], who, titles, idx, int(m["id"]) * 31 + 5)
+	if m["id"] == chap["missions"][0]["id"]:
+		briefing.ticker_text = chap["intro"] + "   ***   " + briefing.ticker_text
+	briefing.start_pressed.connect(func(): briefing.queue_free(); briefing = null; _start_mission(m))
+	briefing.back_pressed.connect(func(): briefing.queue_free(); briefing = null; _show_phase("campaign"))
 
 func _start_mission(m: Dictionary) -> void:
 	campaign_mode = true
@@ -253,35 +282,97 @@ func _build_game() -> void:
 	board.selection_changed.connect(_refresh_side)
 	board.replay_finished.connect(_on_replay_finished)
 	board.context_requested.connect(_on_context)
-	# --- compact status readout (bottom-left): the only permanent HUD
+	# --- small status readout, bottom-left (mode, objectives, selected unit)
 	var hud := PanelContainer.new()
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud.add_theme_stylebox_override("panel", _neon_style(Color(0.01, 0.03, 0.12, 0.55), Color(0.3, 0.6, 1.0, 0.25), 6))
-	hud.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	hud.add_theme_stylebox_override("panel", _neon_style(Color(0.01, 0.03, 0.12, 0.45), Color(0.3, 0.6, 1.0, 0.2), 4))
+	hud.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	hud.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	hud.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	hud.offset_bottom = -4
+	hud.offset_left = 10
+	hud.offset_bottom = -40
 	game_box.add_child(hud)
 	var hv := VBoxContainer.new()
 	hv.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(hv)
-	side_label = _label("", 13)
-	side_label.custom_minimum_size = Vector2(520, 0)
-	side_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	side_label = _label("", 12)
+	side_label.custom_minimum_size = Vector2(300, 0)
 	side_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	side_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hv.add_child(side_label)
-	unit_label = _label("", 12)
+	unit_label = _label("", 11)
 	unit_label.add_theme_color_override("font_color", Color(0.65, 0.85, 1.0))
+	unit_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	unit_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	unit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hv.add_child(unit_label)
-	help_label = _label("Move the mouse to the top edge for orders, or right-click for the menu.", 12)
+	help_label = _label("Mouse to the top edge: orders. Right-click: menu.", 11)
 	help_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.6))
 	help_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	help_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	help_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hv.add_child(help_label)
+	# --- small buttons top-left (MAIN MENU / GAME / RESTART) and ORDERS bottom-left, like the original
+	var tl := HBoxContainer.new()
+	tl.add_theme_constant_override("separation", 2)
+	tl.position = Vector2(4, 4)
+	game_box.add_child(tl)
+	for spec in [["MAIN MENU", func(): _show_phase("menu")], ["GAME", func(): bar_pinned = not bar_pinned], ["RESTART", _on_restart]]:
+		var tb := _button(spec[0], spec[1])
+		tb.add_theme_font_size_override("font_size", 10)
+		tl.add_child(tb)
+	var orders_btn := _button("ORDERS", func(): bar_pinned = not bar_pinned)
+	orders_btn.add_theme_font_size_override("font_size", 10)
+	orders_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	orders_btn.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	orders_btn.offset_left = 4
+	orders_btn.offset_bottom = -4
+	game_box.add_child(orders_btn)
+	# --- control block, bottom centre: PREV UNIT | weapon | NEXT UNIT, PRIME, turn, time bar
+	var blk := PanelContainer.new()
+	blk.add_theme_stylebox_override("panel", _neon_style(Color(0.01, 0.04, 0.16, 0.9), Color(0.35, 0.65, 1.0, 0.8), 2))
+	blk.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	blk.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	blk.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	blk.offset_bottom = -4
+	game_box.add_child(blk)
+	var bk := VBoxContainer.new()
+	bk.add_theme_constant_override("separation", 2)
+	blk.add_child(bk)
+	plan_row = HBoxContainer.new()
+	plan_row.add_theme_constant_override("separation", 4)
+	bk.add_child(plan_row)
+	var test_btn := _button("TEST", _on_test)
+	test_btn.tooltip_text = "Preview this turn on a copy of the game  [Space]"
+	plan_row.add_child(test_btn)
+	turn_label = _label("TURN 1", 14)
+	turn_label.custom_minimum_size = Vector2(130, 0)
+	turn_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	plan_row.add_child(turn_label)
+	var prime_btn := _button("PRIME  ▶", _on_commit)
+	prime_btn.tooltip_text = "Lock in the turn  [Enter]"
+	plan_row.add_child(prime_btn)
+	replay_row = HBoxContainer.new()
+	replay_row.add_theme_constant_override("separation", 4)
+	bk.add_child(replay_row)
+	pause_btn = _button("PAUSE", _toggle_pause)
+	replay_row.add_child(pause_btn)
+	replay_row.add_child(_button("SPEED", func(): board.rspeed = 1.0 if board.rspeed >= 4.0 else board.rspeed * 2.0))
+	replay_row.add_child(_button("SKIP", func(): board.end_replay()))
+	unit_row = HBoxContainer.new()
+	unit_row.add_theme_constant_override("separation", 4)
+	bk.add_child(unit_row)
+	unit_row.add_child(_button("◀ PREV UNIT", func(): board.select_prev()))
+	weapon_label = _label("", 12)
+	weapon_label.custom_minimum_size = Vector2(160, 0)
+	weapon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	unit_row.add_child(weapon_label)
+	unit_row.add_child(_button("NEXT UNIT ▶", func(): board.select_next()))
+	timeline = HSlider.new()
+	timeline.min_value = 0.0
+	timeline.max_value = 5.0
+	timeline.step = 0.05
+	timeline.custom_minimum_size = Vector2(380, 14)
+	timeline.focus_mode = Control.FOCUS_NONE
+	timeline.value_changed.connect(func(val): if not _updating_slider: board.rt = val; board.rpaused = true; board.queue_redraw())
+	bk.add_child(timeline)
 	# --- orders bar: slides in when the cursor touches the top edge
 	topbar = PanelContainer.new()
 	topbar.add_theme_stylebox_override("panel", _neon_style(Color(0.01, 0.04, 0.16, 0.94), Color(0.35, 0.7, 1.0, 0.85), 0))
@@ -295,41 +386,27 @@ func _build_game() -> void:
 	bv.add_child(plan_buttons)
 	for spec in [
 		["Aim [A]", "Face a point; a pre-aimed unit wins the first shot", func(): board.set_tool("aim")],
-		["Duck [D]", "Duck / stand at the last waypoint", func(): board.toggle_duck()],
+		["Check [K]", "Glance at a point for 1 s while moving, then carry on", func(): board.set_tool("check")],
+		["Stand", "Stand at the last waypoint", func(): board.set_stance(false)],
+		["Duck [D]", "Duck at the last waypoint", func(): board.set_stance(true)],
 		["Wait [W]", "Wait 1 s more at the last waypoint", func(): board.cycle_wait()],
 		["Fire [F]", "Rocket / grenade: fire at a point", func(): board.set_tool("fire")],
+		["Focus [O]", "Engage only a chosen enemy", func(): board.set_tool("focus")],
 		["Ignore [I]", "Do not engage a chosen enemy", func(): board.set_tool("ignore")],
+		["Clear F/I", "Clear focus and ignore", func(): board.clear_focus_ignore()],
 		["Hold fire [C]", "Continue on sight: engage nobody", func(): board.toggle_cos()],
+		["Engage", "Engage on sight again", func(): board.engage_on_sight()],
 		["Undo [Bksp]", "Remove the last waypoint", func(): board.remove_last_waypoint()],
 		["Clear [Del]", "Clear this unit's orders", func(): board.clear_orders()],
-		["Next [Tab]", "Select the next unit", func(): board.select_next()],
-		["TEST [Space]", "Preview this turn on a copy of the game", _on_test],
-		["COMMIT [Enter]", "Lock in the turn", _on_commit],
 		["Last turn", "Watch the last turn again", _on_watch_last],
-		["Menu", "Back to the main menu", func(): _show_phase("menu")],
 	]:
 		var btn := _button(spec[0], spec[2])
 		btn.tooltip_text = spec[1]
-		btn.add_theme_font_size_override("font_size", 13)
+		btn.add_theme_font_size_override("font_size", 12)
 		plan_buttons.add_child(btn)
 	replay_buttons = HBoxContainer.new()
-	replay_buttons.add_theme_constant_override("separation", 6)
 	bv.add_child(replay_buttons)
-	pause_btn = _button("Pause [Space]", _toggle_pause)
-	replay_buttons.add_child(pause_btn)
-	replay_buttons.add_child(_button("Speed [+/-]", func(): board.rspeed = 1.0 if board.rspeed >= 4.0 else board.rspeed * 2.0))
-	replay_buttons.add_child(_button("Skip [Enter]", func(): board.end_replay()))
-	timeline = HSlider.new()
-	timeline.min_value = 0.0
-	timeline.max_value = 5.0
-	timeline.step = 0.05
-	timeline.custom_minimum_size = Vector2(420, 0)
-	timeline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	timeline.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	timeline.focus_mode = Control.FOCUS_NONE
-	timeline.value_changed.connect(func(val): if not _updating_slider: board.rt = val; board.rpaused = true; board.queue_redraw())
-	replay_buttons.add_child(timeline)
-	replay_buttons.add_child(_button("Menu", func(): _show_phase("menu")))
+	replay_buttons.add_child(_label("Replay controls are in the block at the bottom.", 12))
 	# --- right-click context menu
 	ctx = PopupMenu.new()
 	ctx.add_theme_stylebox_override("panel", _neon_style(Color(0.01, 0.04, 0.16, 0.97), Color(0.4, 0.75, 1.0, 0.9), 4))
@@ -352,17 +429,24 @@ func _on_context(screen_pos: Vector2, world: Vector2i, unit_id: int) -> void:
 		if own_hit != null and board.game.can_order(plan_team, own_hit):
 			ctx.add_item("Select this unit", 10)
 		if sel != null and sel.alive:
-			ctx.add_item("Move here", 1)
-			ctx.add_item("Aim at this point", 2)
+			ctx.add_item("Add Waypoint", 1)
+			ctx.add_item("Aim here", 2)
+			ctx.add_item("Cancel Aim", 11)
+			ctx.add_item("Check", 12)
 			var kind: String = Balance.TYPES[sel.type]["kind"]
 			if kind == "rocket" or kind == "grenade":
-				ctx.add_item("Fire at this point", 3)
-			if own_hit != null and own_hit.team != sel.team:
-				ctx.add_item("Ignore / stop ignoring this enemy", 4)
+				ctx.add_item("Fire here", 3)
 			ctx.add_separator()
-			ctx.add_item("Duck / stand", 5)
-			ctx.add_item("Wait 1 s more at last waypoint", 6)
-			ctx.add_item("Hold fire (continue on sight)", 7)
+			ctx.add_item("Engage on Sight", 13)
+			ctx.add_item("Continue on Sight", 7)
+			ctx.add_item("Stand", 14)
+			ctx.add_item("Duck", 15)
+			ctx.add_item("Wait 1 s more", 6)
+			ctx.add_separator()
+			if own_hit != null and own_hit.team != sel.team:
+				ctx.add_item("Focus on Enemy", 16)
+				ctx.add_item("Ignore Enemy", 4)
+			ctx.add_item("Clear Focus/Ignore", 17)
 			ctx.add_item("Undo last waypoint", 8)
 			ctx.add_item("Clear this unit's orders", 9)
 			ctx.add_separator()
@@ -390,6 +474,13 @@ func _on_ctx_item(id: int) -> void:
 		3: if board.selected >= 0: board.set_fire(board.selected, w.x, w.y)
 		4: if board.selected >= 0 and _ctx_unit >= 0: board.toggle_ignore(board.selected, _ctx_unit)
 		5: board.toggle_duck()
+		11: board.cancel_aim()
+		12: if board.selected >= 0: board.set_check(board.selected, w.x, w.y)
+		13: board.engage_on_sight()
+		14: board.set_stance(false)
+		15: board.set_stance(true)
+		16: if board.selected >= 0 and _ctx_unit >= 0: board.toggle_focus(board.selected, _ctx_unit)
+		17: board.clear_focus_ignore()
 		6: board.cycle_wait()
 		7: board.toggle_cos()
 		8: board.remove_last_waypoint()
@@ -451,6 +542,10 @@ func _show_phase(p: String) -> void:
 		overlay.visible = false
 	plan_buttons.visible = (p == "plan")
 	replay_buttons.visible = (p == "replay")
+	plan_row.visible = (p == "plan")
+	unit_row.visible = (p == "plan")
+	replay_row.visible = (p == "replay")
+	timeline.visible = (p == "replay")
 	if p == "menu" or p == "campaign":
 		topbar.visible = false
 	_refresh_side()
@@ -511,6 +606,8 @@ func _refresh_side() -> void:
 		s += "  |  " + ("Test preview" if board.rtest else "Replay")
 	side_label.text = s
 	unit_label.text = board.unit_info().replace("\n", "  |  ") if phase == "plan" else ""
+	turn_label.text = "TURN %d" % (game.turn + 1)
+	weapon_label.text = board.selected_weapon_name() if phase == "plan" else ""
 
 func _on_test() -> void:
 	if phase != "plan":
@@ -530,6 +627,14 @@ func _on_test() -> void:
 	_start_replay(sim.frames, sim.events, before, plan_team, true, false)
 	phase = "replay"
 	_show_phase("replay")
+
+func _on_restart() -> void:
+	if game == null:
+		return
+	if campaign_mode:
+		_start_mission(campaign_mission)
+	else:
+		_on_start()
 
 func _on_watch_last() -> void:
 	if last_replay.is_empty() or phase != "plan":
@@ -633,6 +738,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			KEY_A: board.set_tool("aim")
 			KEY_F: board.set_tool("fire")
 			KEY_I: board.set_tool("ignore")
+			KEY_K: board.set_tool("check")
+			KEY_O: board.set_tool("focus")
 			KEY_C: board.toggle_cos()
 			KEY_D: board.toggle_duck()
 			KEY_W: board.cycle_wait()
