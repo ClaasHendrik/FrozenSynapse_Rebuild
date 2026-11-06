@@ -54,3 +54,11 @@ logic of the storyline.
 **When the Cold Synapse remake is declared done, remind the owner of this project** (docs/NEW_GAME_DESIGN.md,
 draft 2, working title "Thin Ice") and offer to start with roadmap step 1 (one Berlin spy mission at the new scale).
 Open points to raise then: title, how historical, how remote assets are secured in Act I, hex/square handover.
+
+## Style feedback on units across the scales (owner, after draft 2)
+* Human figures: liked. Keep the figure style.
+* Going up the scale, abstraction should rise GRADUALLY, not jump to symbol rectangles. On the Act II, III and even IV
+  maps the icons should resemble a 3D version of what the unit is: a single vehicle, a squad of five people, a group of
+  tanks, even a full armoured/mechanised brigade, shown as small 3D-looking models, not "rectangles with drawings".
+* Symbols/echelon marks may remain as a light overlay; the main read is the little 3D model.
+* Cold Synapse restyle (later, not now): same figure family but abstract: one colour all over, no faces/uniform detail.
