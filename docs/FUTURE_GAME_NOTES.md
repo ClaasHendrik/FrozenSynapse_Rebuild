@@ -115,3 +115,16 @@ Open points to raise then: title, how historical, how remote assets are secured 
 * Even the last strategic act (VI) must always be playable: with e.g. only 100 men over 60 left you can give orders but they
   cannot get away before the bombs drop; the player watches them being destroyed. Act VII is always possible by definition.
 * Purpose: show how brutal war is and can be; it is not about winning.
+
+## Answers on the campaign chapter (owner) and assistant proposals
+* Result grades (decisive win ... disaster): fine.
+* Home front must affect more than supply and reinforcements: also the morale reinforcements bring, rules of engagement, field
+  morale (letters/news), leave and rotation, procurement quality/speed, intel and recruitment, political freedom (incl. later
+  nuclear options). A calm/censored home front can also hide reality (Official Version vs Sensors).
+* Veterancy: visible rank mark and detail line; effects: faster reaction, steadier aim, breaks later on the morale scale;
+  nearby units gain a little morale, losing a veteran costs neighbours morale; hard to replace; earned by surviving and winning.
+* Double spy mission: example effects in the campaign state (starting intel values change by outcome; intel then moves with enemy
+  losses): you succeed/they fail (intel on them ~20% -> ~55%, their intel on you down, agent caught, small political gain, leak risk);
+  both succeed (~50% both, tension sharply up, no surprise, supply decides); both fail (~15% both, small morale hit, fog);
+  you fail/they succeed (yours ~15%, theirs on you ~60%, home-front support down, sources silent, ambushes on weak points).
+* Open: dossier shows exact numbers or words ("slightly", "sharply"); veteran morale aura visible as a mark; add to design doc as draft 4.
