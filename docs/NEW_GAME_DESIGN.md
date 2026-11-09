@@ -1,4 +1,4 @@
-# THIN ICE (working title): design document, draft 2
+# THIN ICE (working title): design document, draft 3
 
 _A Cold War campaign that escalates from spy games to the end of the world, and then asks whether we could just stop._
 
@@ -138,7 +138,92 @@ The Frozen Synapse style (a close, extruded, glowing grid with individual figure
 * **Readability first.** A few unit types per act, large clear symbols, and a map that is usable in one evening of learning.
 
 
-# 5. Build, platforms and originality
+# 5. Campaign state, morale and consequences
+
+**The rule:** every mission ends, and the story continues whatever the result. A mission is not won or lost in the usual sense. It changes the state of the war, and that state shapes the next mission. This is the idea behind games like Strike Commander: the more you lose, the worse your next starting point, and the more you win, the better your equipment, bases and support. The point is to show how brutal war is and how small things become large, not to let the player win.
+
+
+## Mission results
+
+| Grade | Meaning | Typical effect on the campaign |
+|---|---|---|
+| Decisive win | Objectives met cheaply | Morale up, better equipment, forward base, political support up |
+| Win | Objectives met | Small gains in morale and support |
+| Costly win | Objectives met at heavy loss | Gains, but forces, veterans and morale suffer; home front reacts |
+| Draw / withdrawal | Objectives not met, force preserved | Little change; the enemy keeps the initiative |
+| Defeat | Objectives failed, heavy loss | Forces and morale down, intel and supply lost, political pressure rises |
+| Disaster | Force destroyed or surrounded | Reserves must be called up; support and morale collapse; the story goes on from the new situation |
+
+
+## The persistent state (what carries over)
+
+* **Forces:** surviving units, veterans, equipment and their condition. Losses stay lost until replaced.
+* **Supply:** fuel, ammunition and spares, set by logistics decisions and earlier missions.
+* **Intel:** what you know about the enemy, in partial and ageing form (see below).
+* **Bases and access:** forward bases, safe houses, border crossings, air cover, earned or lost by results.
+* **Morale** on three layers: unit morale, the home front and political support.
+* **Reserves:** how many have been called up so far, and how weak the next wave is.
+
+
+## Morale: three layers
+
+| Layer | Moves with | Affects |
+|---|---|---|
+| Unit morale | Wins and losses, rest, rotation, food, mail, trust in command, orders that cost lives needlessly | How units behave in a mission (levels below) |
+| Home front | Casualties, civilian harm, news, the mood in cities, strikes and protests | Reinforcements, rules of engagement, tension, how much the leadership will allow |
+| Political support | Results, alliances, what the public learns, what is leaked | Air bases, allies, new equipment and, in later acts, access to nuclear options |
+
+Morale is a status detail of every unit, shown beside health, fuel and ammunition. For your own units it is known. For the enemy it is hidden unless your intel is good, though a shaken enemy shows signs (hanging back, slow reactions).
+
+
+## How low morale changes behaviour
+
+| Level | What happens in a mission |
+|---|---|
+| Steady | Normal behaviour |
+| Shaken | Slightly delayed reaction and slightly less precise aim |
+| Wavering | Late and poor execution; units reach 'about here' instead of the exact point; more missed shots |
+| Cracking | Orders carried out only in part. Rarely, friendly fire when own units stand close to a target |
+| Broken | Desertion and refusal of orders. In the worst cases a unit may switch sides to the enemy |
+
+* **Deterministic:** every morale effect is decided from the mission seed, so the Test preview is still exact and a replay is always the same.
+* **Visible:** friendly fire, refusals and desertions are shown plainly in the replay and never hidden.
+* **Switching sides** is tied to the story (a political or ideological break), not only to low numbers, and happens to both sides equally.
+* **Recovery:** morale can rise again with rest, supplies, a win, a trusted leader's order or good news, so a bad run is not permanent.
+
+
+## Reserves: always available, always weaker
+
+* There is always a chance to call up reserves, but each wave is weaker than the last: older men, boys, conscripts with little training or fitness.
+* Each call-up lowers the ceilings for strength, accuracy and morale of the next wave, and the dossier says so plainly.
+* Calling reserves also costs politically and on the home front.
+* **The last strategic mission, Act VI, is always playable.** If only a hundred men over sixty remain, they can be given orders, but they cannot get away before the bombs drop. The play is what you choose to do while it happens. It is not scored as a win or a loss. Act VII is always possible by definition.
+
+
+## Partial intel, shaped by the war
+
+* Each fact about an enemy unit (type, strength, fuel, ammunition, crew, position, orders) has its own chance of being revealed, decided from the mission seed. No spy ever reveals everything: the cap is about 70%.
+* Reveal quality improves as the enemy suffers losses, because there is less to hide, less guarding and more confusion.
+* Uncertain facts show as ranges, and some intel can be disinformation. Intel ages each turn unless the source is kept alive.
+* An early counter-espionage mission can end in four ways (you succeed or fail, they succeed or fail), and all four are played on.
+
+
+## Guard rails
+
+* **Spiral protection:** a bad run must not make the game unplayable. Desperate defenders fight harder, allies step in when you are collapsing, and the enemy is under the same morale and supply pressure.
+* **Symmetry:** both sides use the same system, so neither bloc is favoured.
+* **Neutral tone:** the results of the war are never a joke. The Ministry of Optimism bulletins and casualty forms from the humour chapter report the state as spin, while the real numbers drive play.
+
+
+## Open questions for this chapter
+
+* How many mission result grades are enough, and should the player see them by name?
+* How strongly should the home front limit what the player may do (rules of engagement) versus only limiting reinforcements?
+* Should a unit's veterancy be a visible status detail like morale?
+* How should the double spy mission score the four outcomes in the campaign state?
+
+
+# 6. Build, platforms and originality
 
 * **Engine:** Godot 4 with a deterministic, integer-based simulation core reused from the current project: orders, preview on a copy, replay, fog of war, and the same style of automated tests.
 * **New modules:** the strategic layer (tracks, order slots, effects as data), campaign state with branches, scale adapters for each act, and a longer-turn planner and AI.
