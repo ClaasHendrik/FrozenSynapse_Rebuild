@@ -1,4 +1,4 @@
-# THIN ICE (working title): design document, draft 3
+# THIN ICE (working title): design document, draft 4
 
 _A Cold War campaign that escalates from spy games to the end of the world, and then asks whether we could just stop._
 
@@ -173,6 +173,18 @@ The Frozen Synapse style (a close, extruded, glowing grid with individual figure
 | Home front | Casualties, civilian harm, news, the mood in cities, strikes and protests | Reinforcements, rules of engagement, tension, how much the leadership will allow |
 | Political support | Results, alliances, what the public learns, what is leaked | Air bases, allies, new equipment and, in later acts, access to nuclear options |
 
+
+## What the home front reaches
+
+* **Reinforcements:** how many come, and the morale, fitness and training they arrive with. A cheering home front sends confident men, a tired one sends resentful ones.
+* **Rules of engagement:** a hostile press or protests restrict targets and tactics.
+* **Field morale:** letters, news and rumours reach the front and move morale up or down.
+* **Leave and rotation:** how often units can be pulled back to rest.
+* **Procurement:** how fast new equipment arrives, and how reliable it is.
+* **Intel and recruitment:** informants and volunteers come more easily with public support.
+* **Political freedom:** how far leaders may go in later acts, including the nuclear options.
+* **Hiding reality:** a calm or censored home front can mask what is happening; the Official Version and What the Sensors Say views show the gap.
+
 Morale is a status detail of every unit, shown beside health, fuel and ammunition. For your own units it is known. For the enemy it is hidden unless your intel is good, though a shaken enemy shows signs (hanging back, slow reactions).
 
 
@@ -208,6 +220,22 @@ Morale is a status detail of every unit, shown beside health, fuel and ammunitio
 * An early counter-espionage mission can end in four ways (you succeed or fail, they succeed or fail), and all four are played on.
 
 
+## Veterancy
+
+* A visible rank mark beside the unit and a line in its details.
+* Veterans react faster, aim more steadily and break later on the morale scale.
+* **They also give nearby units extra morale and fighting prowess.** This aura is visible: a small glow or mark around the veteran and the units it steadies.
+* Losing a veteran costs the units beside it some morale. Veterans are hard to replace, because reserves arrive without experience.
+* Veterancy is earned by surviving missions and winning fights, not by time served.
+
+
+## Consequences are felt, not reported
+
+* The effects of a mission outcome appear **only in the missions after it,** and are felt through play: how much you see of the enemy, how your units behave, what reinforcements and equipment arrive.
+* The dossier does not show exact numbers for them. At most it uses plain words ('slightly', 'sharply'), and only in the next briefing.
+* Example: after a failed spy operation your intel is simply thin in the next mission, and enemy ambushes land on weak points. The game does not announce how thin.
+
+
 ## Guard rails
 
 * **Spiral protection:** a bad run must not make the game unplayable. Desperate defenders fight harder, allies step in when you are collapsing, and the enemy is under the same morale and supply pressure.
@@ -215,12 +243,18 @@ Morale is a status detail of every unit, shown beside health, fuel and ammunitio
 * **Neutral tone:** the results of the war are never a joke. The Ministry of Optimism bulletins and casualty forms from the humour chapter report the state as spin, while the real numbers drive play.
 
 
-## Open questions for this chapter
+## Decisions on this chapter
 
-* How many mission result grades are enough, and should the player see them by name?
-* How strongly should the home front limit what the player may do (rules of engagement) versus only limiting reinforcements?
-* Should a unit's veterancy be a visible status detail like morale?
-* How should the double spy mission score the four outcomes in the campaign state?
+* Six result grades are fine; the player sees them by name.
+* The home front reaches many variables (see above), not only supply and reinforcements.
+* Veterancy is visible and gives nearby units extra morale and fighting prowess; the aura is shown on the map.
+* Outcome effects are felt only in later missions and are not reported as exact numbers.
+
+
+## Still open
+
+* Exact scoring of the double spy mission's four outcomes (starting values to be tuned in play).
+* How strongly the home front limits what the player may do, as opposed to how well things arrive.
 
 
 # 6. Build, platforms and originality

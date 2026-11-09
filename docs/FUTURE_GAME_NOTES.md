@@ -128,3 +128,8 @@ Open points to raise then: title, how historical, how remote assets are secured 
   both succeed (~50% both, tension sharply up, no surprise, supply decides); both fail (~15% both, small morale hit, fog);
   you fail/they succeed (yours ~15%, theirs on you ~60%, home-front support down, sources silent, ambushes on weak points).
 * Open: dossier shows exact numbers or words ("slightly", "sharply"); veteran morale aura visible as a mark; add to design doc as draft 4.
+
+## Decisions after design draft 3
+* Outcome effects are felt only in the missions AFTER the outcome, through play, not reported as exact numbers (at most plain words
+  in the next briefing). Veteran morale aura is visible on the map. Design document is now draft 4. A vertical slice plan
+  (docs/VERTICAL_SLICE_PLAN.pdf) describes the next dev stage: one Berlin mission, milestones M1-M6. Not started yet.
