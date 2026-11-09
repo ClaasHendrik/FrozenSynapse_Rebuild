@@ -87,3 +87,21 @@ Open points to raise then: title, how historical, how remote assets are secured 
 * Counter-espionage: an early mission (or one double mission with both operations at once). All four outcomes are
   possible and PLAYED ON (you succeed/they fail, both succeed, both fail, you fail/they succeed). The result counts even
   if your whole team dies: it is not about winning, it is about showing how small things become large.
+
+## Overlaps, QA, partial intel, persistent consequences (owner feedback, then assistant proposals)
+* Strength bars sit directly on/above the unit (closer than in the t1 sample). Overlap handling proposals: bar belongs to the
+  sprite and is depth-sorted; bar fades to ~40% when covered by another sprite; minimum visual spacing between units
+  (display nudge only, rules unaffected); crowd collapse (thin 2 px bars above ~5 overlaps, stack with count past a density
+  threshold); hovered/selected unit raised to front; a key (Alt) shows all full bars.
+* Mock-up QA rule: every mock-up gets a layout check (text inside boxes, no label overlaps, bars not crossing units) before it
+  is shown; unresolved issues are flagged.
+* Spy results are partial: per-fact reveal (type, strength, fuel, ammo, crew, position, orders) decided deterministically from
+  the mission seed, capped around 70%, quality improves as enemy losses grow (less to track, less guarding, panic), uncertain facts
+  shown as ranges, possible disinformation, intel decays over turns unless the source is kept.
+* Every mission ends on a graded result and the story continues regardless (decisive win ... disaster). Persistent state:
+  forces/veterans/equipment (losses carry over), supply, intel, forward bases; MORALE in three layers (unit morale, home front,
+  political support) with consequences (reaction speed, willingness to take risky orders, desertion/refusal/surrender, protests,
+  reinforcements, rules of engagement, unlocks incl. nuclear options later). Spiral protection (desperate defenders, allies,
+  symmetrical pressure on the enemy). Same system for both sides. Reference: Strike Commander (campaign consequences).
+* Open questions asked: visible morale number or only through behaviour; may very-low-morale units refuse orders; minimum force
+  floor after a disaster; draw the overlap-solution sample next?
