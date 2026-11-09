@@ -133,3 +133,12 @@ Open points to raise then: title, how historical, how remote assets are secured 
 * Outcome effects are felt only in the missions AFTER the outcome, through play, not reported as exact numbers (at most plain words
   in the next briefing). Veteran morale aura is visible on the map. Design document is now draft 4. A vertical slice plan
   (docs/VERTICAL_SLICE_PLAN.pdf) describes the next dev stage: one Berlin mission, milestones M1-M6. Not started yet.
+
+## STANDING INSTRUCTION FROM THE OWNER (2026-11): NEW REPOSITORY BEFORE ANY DEV WORK
+* Thin Ice gets its own NEW repository (clean licensing/history; Cold Synapse stays private). The owner will create it later.
+* The assistant must remind the owner FREQUENTLY and INSIST that the repository is created BEFORE any development work on Thin Ice
+  starts (no code, no engine reuse, no prototype until then). Documents and mock-ups are fine to keep producing in the meantime.
+* The assistant cannot create repositories from the cloud session; the owner creates an empty one and attaches it to a session.
+* Dev order question (finish Cold Synapse first vs parallel) is dropped because the projects are separate.
+* Story: the owner chose to fix the main storyline and branch structure NOW (not "assistant decides throughout"). A story skeleton
+  is being drafted (docs/STORY_SKELETON.pdf), to be locked, changed or rejected branch point by branch point.
