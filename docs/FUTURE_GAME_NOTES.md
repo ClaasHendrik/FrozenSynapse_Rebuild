@@ -62,3 +62,14 @@ Open points to raise then: title, how historical, how remote assets are secured 
   tanks, even a full armoured/mechanised brigade, shown as small 3D-looking models, not "rectangles with drawings".
 * Symbols/echelon marks may remain as a light overlay; the main read is the little 3D model.
 * Cold Synapse restyle (later, not now): same figure family but abstract: one colour all over, no faces/uniform detail.
+
+## Decisions on unit granularity (owner, after the 3D-model samples)
+* The pad/rectangle around a unit goes. Individual units need no frame; groups get a bracket only when they ARE a group.
+* Acts I-II: every soldier/vehicle is its own unit with its own orders. Act III: platoons/companies of 3-6 models move as
+  one and can be split into single vehicles when you zoom in. Act IV-V: brigades/convoys/crowds as one group. Act VI: one
+  asset per unit (silo, sub, wing). Acts stay separate in their unit dynamics (no mixing of scales in a mission).
+* Selecting a platoon/company shows the strength (and fuel/ammo) of each unit in it.
+* Overlap missions between acts: designer's decision (to be made when writing missions).
+* Temporary groups: box-select several units and move them together, with a choice of pace: slowest unit sets the pace, or
+  each as fast as possible. (Not combining from the base unit scale downward.)
+* Marker for individual units: samples drawn (ring under each vs. no ring until selected); owner to pick.
