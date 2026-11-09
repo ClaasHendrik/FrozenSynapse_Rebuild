@@ -105,3 +105,13 @@ Open points to raise then: title, how historical, how remote assets are secured 
   symmetrical pressure on the enemy). Same system for both sides. Reference: Strike Commander (campaign consequences).
 * Open questions asked: visible morale number or only through behaviour; may very-low-morale units refuse orders; minimum force
   floor after a disaster; draw the overlap-solution sample next?
+
+## Morale and reserves: owner decisions
+* Morale is a visible status detail like health or ammunition (own units known; enemy morale mostly hidden unless intel is good).
+* Morale degrades behaviour in levels, all deterministic (seeded): steady; shaken (slightly delayed reaction, slightly imprecise);
+  wavering (late/poor execution, "about here" movement, more misses); cracking (rare friendly fire when own units are close
+  to the target, partial execution); broken (desertion, order refusal, even switching sides to the enemy).
+* Reserves can always be called up, but each wave is weaker (older men, boys, little life experience, weak bodies).
+* Even the last strategic act (VI) must always be playable: with e.g. only 100 men over 60 left you can give orders but they
+  cannot get away before the bombs drop; the player watches them being destroyed. Act VII is always possible by definition.
+* Purpose: show how brutal war is and can be; it is not about winning.
