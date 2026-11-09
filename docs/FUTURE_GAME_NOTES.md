@@ -73,3 +73,17 @@ Open points to raise then: title, how historical, how remote assets are secured 
 * Temporary groups: box-select several units and move them together, with a choice of pace: slowest unit sets the pace, or
   each as fast as possible. (Not combining from the base unit scale downward.)
 * Marker for individual units: samples drawn (ring under each vs. no ring until selected); owner to pick.
+
+## Information and markers (owner decisions after the unit-granularity samples)
+* Selection ring: only on the SELECTED unit, never on enemy units. The ring is centred on the unit's BODY (not its gun,
+  tail or other protruding parts), and this correction is applied only to unit types whose body is off-centre
+  (tank, carrier gun, helicopter, self-propelled gun). People and trucks are already centred.
+* Strength bar: every unit always shows a bar above it, an outline of the full bar with the actual strength as the
+  filled proportion. Plus the per-unit strength / fuel / ammo details shown when a platoon/company is selected.
+* Information asymmetry is a core mechanic: we know our own units better than the enemy's. Enemy units may show only
+  what is obvious (outline bar with unknown fill, "?" type if unidentified, destroyed vehicles / dead soldiers crossed
+  out). Selecting an enemy shows partial data with unknown fields crossed out. Better intel comes from a successful
+  agent / activated source / passed orders from an earlier mission.
+* Counter-espionage: an early mission (or one double mission with both operations at once). All four outcomes are
+  possible and PLAYED ON (you succeed/they fail, both succeed, both fail, you fail/they succeed). The result counts even
+  if your whole team dies: it is not about winning, it is about showing how small things become large.
