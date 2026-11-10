@@ -206,3 +206,12 @@ Open points to raise then: title, how historical, how remote assets are secured 
   invasion as a spy, operationally, or both. The assistant is the main story writer; these are ideas to consider and include where
   possible. Implications to work through later: the "Cold War" label and 1980s setting of the current skeleton, real states and living
   leaders (IP checklist point 8), store and regional sales rules for depicting real present-day conflicts, and decisions D1-D8.
+
+## Decisions after unit style sheet 4 (owner, 2026-11) and transfer
+* Medical symbol A (white cross on blue disc) and the fuel sign are KEPT. Carrier and air base representations are KEPT.
+* Wreck and crash-site proposal: "go" (accepted). Hybrid approach for units and actions: AGREED (shared game-wide verb set and unit
+  classes first, then act by act), because it balances each act's own dynamics with the game's overall identity.
+* Sheet 5 (docs/VISUAL_IDENTITY_3D_UNITS_V5.pdf): rifle butt in the shoulder (between the two earlier versions), radar with a real dish.
+  Owner reviews sheet 5 in the NEW session.
+* "go for transfer" given: docs/HANDOVER.md and a zip of all artifacts produced. All further Thin Ice work happens in a new session on
+  the ThinIce_WarIsInevitable repository.
