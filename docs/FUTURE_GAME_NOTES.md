@@ -179,3 +179,12 @@ Open points to raise then: title, how historical, how remote assets are secured 
 * TRIGGER "go for transfer": when the owner says exactly that, produce (1) one Markdown hand-over file that lets a separate chat/session
   continue with all relevant information (decisions, preferences, state, open questions, file map) and (2) a zip of ALL artifacts ever
   created, including superseded versions, to show the progression across development stages.
+
+## Publication intent and IP hygiene (owner, 2026-11)
+* The Thin Ice repo (ThinIce_WarIsInevitable) is now PRIVATE (owner changed it). Thin Ice is NOT a rebuild; the owner is considering
+  publishing it once complete. Therefore it must stay clearly "its own game", inspired by but not copying Frozen Synapse, Commandos,
+  Gary Grigsby games or Defcon: no copied gameplay mechanics, unit actions, interfaces, missions or story beats; own missions from
+  scratch (accidental similarity acceptable). Neon dark look is a general style, accepted. The assistant is to list further IP-sensitive
+  subjects (see docs/IP_CHECKLIST.md) and keep watching them.
+* BEFORE ANY PUBLICATION: remove every reference to Cold Synapse / the private rebuild and any Cold Synapse screenshot from the repo
+  and its history (consider a fresh history), and re-check all assets, names and texts against the checklist.
