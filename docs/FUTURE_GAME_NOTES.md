@@ -188,3 +188,21 @@ Open points to raise then: title, how historical, how remote assets are secured 
   subjects (see docs/IP_CHECKLIST.md) and keep watching them.
 * BEFORE ANY PUBLICATION: remove every reference to Cold Synapse / the private rebuild and any Cold Synapse screenshot from the repo
   and its history (consider a fresh history), and re-check all assets, names and texts against the checklist.
+
+## Owner feedback on unit style sheet 3 and story widening (2026-11; sheet 4 produced, rest recorded only)
+* Sheet 4 (docs/VISUAL_IDENTITY_3D_UNITS_V4.pdf): rifle at shoulder height with left arm tucked; fuel sign on the tanker; NO red cross
+  anywhere (protected emblem under the Geneva Conventions; white cross on red is the Swiss arms, also protected). Medical symbol
+  options A-D shown; A (white cross on blue disc) used provisionally; owner to choose. Scientists get team-colour trim; the defector is
+  a distinct neutral figure (grey coat, hat, scarf, suitcase). Civilians wear ordinary clothes, never team colours; aligned civilians
+  ("informants") show team armbands. Aircraft carrier and air base added (Acts III and VI).
+* Owner questions answered as PROPOSALS (not yet decided): wrecks persist only where they matter (cover, road block, salvage in Act V);
+  lost aircraft leave a temporary crash site (rescue or capture the crew); faint outlines on formations only count losses. Friendly
+  civilians are not directly controllable; escorted people take a few simple orders (follow, wait, hide, go there).
+* Dev procedure idea (owner): define all units and their possible actions soon. Assistant recommendation: game-wide skeleton first
+  (unit classes plus one shared verb set), then detail act by act. Awaiting owner decision.
+* STORY WIDENING (owner, recorded only, no "go"): move beyond the usual "Allies vs Russia" Cold War frame to today's multipolar world;
+  other powers, China in particular, play a larger role. The cause of the global war should be manifold and global. Example idea: part
+  of the story touches or plays in Taiwan because of its role in leading-edge semiconductor production, defending against a possible
+  invasion as a spy, operationally, or both. The assistant is the main story writer; these are ideas to consider and include where
+  possible. Implications to work through later: the "Cold War" label and 1980s setting of the current skeleton, real states and living
+  leaders (IP checklist point 8), store and regional sales rules for depicting real present-day conflicts, and decisions D1-D8.
