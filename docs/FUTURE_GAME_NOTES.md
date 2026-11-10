@@ -142,3 +142,33 @@ Open points to raise then: title, how historical, how remote assets are secured 
 * Dev order question (finish Cold Synapse first vs parallel) is dropped because the projects are separate.
 * Story: the owner chose to fix the main storyline and branch structure NOW (not "assistant decides throughout"). A story skeleton
   is being drafted (docs/STORY_SKELETON.pdf), to be locked, changed or rejected branch point by branch point.
+
+## Owner's themes, tone and optional-mission rules (2026-11; recorded only, more messages may follow)
+### Messages the game should carry
+* War is wanted by nobody and nobody wins it: every victory is also a loss, and a loss never becomes a victory.
+* Nature and people are resilient and pick up the pieces, or at least try (hence Act VII).
+* Nobody chooses where they are born, so nobody chooses their side; someone born "on the other side" is not inhuman for that.
+* Competition is good; cooperation is better; both combined are greater still, but cooperation is always the stronger of the two.
+* The problem in the end, everywhere, is abuse of power. Idea: on the highest between-mission (strategic) level, offer some truly
+  poor decision options that clearly serve only the decider and nobody else.
+### Tone
+* Humour: more is better than less. A somber register stays alongside it, especially where decisions cause deaths and destruction.
+* Politics often has no good or morally just option. A military victory always brings death, destruction, suffering and despair,
+  mostly to the other side but also to one's own (families of dead and missing soldiers). It is a matter of "more" on the loser's
+  side and "less" on the winner's, never none.
+### Bridge missions (owner design)
+* Start in the OLD scale; an event outside the player's control happens on the next larger scale (possibly a cutscene); the player is
+  then re-assigned to a higher command level and the view switches to the larger scale, controlling a different unit or a
+  combination of units for a few turns or until an easily reachable goal is met.
+* Some ineffective enemy action may occur on the new level so there is a little fighting there too.
+* Leaving the old level: find an exit, or report to a superior who issues the re-assignment. On the new map the player then moves
+  the new units (including themselves) to the new area, or first collects units to form the new command.
+* Goals are easy to reach (at least on lower difficulty); the mission doubles as a short tutorial for the new scale: movement
+  speeds, available actions and so on.
+* Optional, no effect: skipping a bridge mission changes nothing in later missions (units, strengths, numbers stay the same). The
+  player only misses information that helps gameplay and story understanding.
+### Optional special operations (owner rule; replaces the open question D9)
+* Purely the player's choice. Skipping must always give a slightly WORSE result than playing and failing every goal (counter-espionage
+  example: worse than "own spy fails and the enemy spy is not found"). It always pays to play, even with the worst outcome.
+* Message: effort spent on finding information always pays off. It only becomes visible by playing the worst outcome once and
+  skipping the mission once, which is fine.
