@@ -172,3 +172,10 @@ Open points to raise then: title, how historical, how remote assets are secured 
   example: worse than "own spy fails and the enemy spy is not found"). It always pays to play, even with the worst outcome.
 * Message: effort spent on finding information always pays off. It only becomes visible by playing the worst outcome once and
   skipping the mission once, which is fine.
+
+## Thin Ice repository and pending transfer package (owner, 2026-11)
+* The owner HAS created the new GitHub repository (name not yet given to the assistant). Repo condition for dev work is therefore met on
+  their side; it still has to be attached to a session (add_repo) before anything is pushed there. Story work continues first.
+* TRIGGER "go for transfer": when the owner says exactly that, produce (1) one Markdown hand-over file that lets a separate chat/session
+  continue with all relevant information (decisions, preferences, state, open questions, file map) and (2) a zip of ALL artifacts ever
+  created, including superseded versions, to show the progression across development stages.
