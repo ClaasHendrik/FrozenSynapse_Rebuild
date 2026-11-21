@@ -215,3 +215,7 @@ Open points to raise then: title, how historical, how remote assets are secured 
   Owner reviews sheet 5 in the NEW session.
 * "go for transfer" given: docs/HANDOVER.md and a zip of all artifacts produced. All further Thin Ice work happens in a new session on
   the ThinIce_WarIsInevitable repository.
+
+## Unit style sheet 5 approved (owner, 2026-11-21)
+* Sheet 5 (docs/VISUAL_IDENTITY_3D_UNITS_V5.pdf) is approved as the unit look ("good to go"). Fine tuning of individual models stays
+  possible later (for example rifle pose, small details); it does not block the story, units-and-actions or vertical-slice work.
